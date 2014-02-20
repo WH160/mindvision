@@ -1,0 +1,10 @@
+fileFormatVersion: 2
+guid: d731ae5f309ca20478fb2895dc5be7e6
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - lineToCopy: {fileID: 100000, guid: 364a922edcaf04048b6630522ed6fc23, type: 2}
+  - coreelementToCopy: {fileID: 100000, guid: 0700b5f06efffa448919c31b966ceb1f, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
