@@ -120,14 +120,20 @@ public class viewer : MonoBehaviour {
 		Debug.DrawRay (ray.origin,ray.direction*10,Color.cyan);
 		vec3=ray.GetPoint(20);
 		mouse_pos=new Vector3(vec3.x,vec3.y,vec3.z);
-
+		if(Screen.lockCursor==true)
+			Screen.lockCursor=false;
 
 		if(Input.anyKey==true || Input.GetAxis("Mouse 3")!=0)
 		{
 			action_control();
 		}
 	}
-
+	Boolean mouselocked(){
+		if(Screen.mouselocked==true)
+			return true;
+		else
+			return false;
+	}
 	void action_control()
 	{
 		objectdirection();
@@ -152,11 +158,7 @@ public class viewer : MonoBehaviour {
 		{
 			rotate_camera(rotation_mode);
 		}
-		else
-		{
-			if(Screen.lockCursor==true)
-				Screen.lockCursor=false;
-		}
+
 		if(menu.getOverMenu() != true) {
 			if(Input.GetMouseButtonDown (0)==true && menu.getAction_mode()==1)
 				create_coreelement ();
