@@ -5,7 +5,9 @@ using System;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 
+
 public class viewer : MonoBehaviour {
+
 
 	public class ListWithDuplicates : List<KeyValuePair<GameObject, LineRenderer>>
 	{
@@ -56,6 +58,7 @@ public class viewer : MonoBehaviour {
 	Vector3 last_end;				//endvector of relation
 	Vector3 obj_pos;				//position of object
 	Vector3 torchpos;				//position of selection light
+	Vector3 focus;					//rotation focus
 	GameObject start_obj;
 
 	Vector3 minX;
@@ -72,13 +75,14 @@ public class viewer : MonoBehaviour {
 	float speed; 					//cameraspeed
 	public GameObject lineToCopy;
 	public GameObject coreelementToCopy;
+	GameObject elm;
 	public int move_mode;
 	
 	List<GameObject> coreelements;	//list of coreelements
 	List<LineRenderer> relations;	//list of relations
 	List<LineRenderer> tmp_list;
 
-
+	bool element_locked;
 	
 	int i;							//default index
 	int inspect_mode;
@@ -91,6 +95,7 @@ public class viewer : MonoBehaviour {
 	string element_details;
 	GameObject torch = null;
 	GameObject selectedObject = null;
+	public GameObject locked_element;
 
 
 	menu menu;
@@ -100,7 +105,9 @@ public class viewer : MonoBehaviour {
 	List<LineRenderer> selectedRelations;
 
 	public void Start(){
-
+		element_locked=false;
+		locked_element=null;
+		GameObject elm = null;
 		rotation_mode=2;
 		store = 1;
 		move_mode = 1;
@@ -116,20 +123,27 @@ public class viewer : MonoBehaviour {
 	}
 	// Update is called once per frame
 	void Update () {
+
 		Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
 		Debug.DrawRay (ray.origin,ray.direction*10,Color.cyan);
 		vec3=ray.GetPoint(20);
 		mouse_pos=new Vector3(vec3.x,vec3.y,vec3.z);
-		if(Screen.lockCursor==true)
-			Screen.lockCursor=false;
 
 		if(Input.anyKey==true || Input.GetAxis("Mouse 3")!=0)
 		{
 			action_control();
 		}
+		else
+		{
+			if(mouselocked())
+			{
+				Screen.lockCursor=false;
+				element_locked=false;
+			}
+		}
 	}
-	Boolean mouselocked(){
-		if(Screen.mouselocked==true)
+	bool mouselocked(){
+		if(Screen.lockCursor==true)
 			return true;
 		else
 			return false;
@@ -138,7 +152,6 @@ public class viewer : MonoBehaviour {
 	{
 		objectdirection();
 		construction_mode();
-
 	}
 	void presentation_mode()
 	{
@@ -158,7 +171,6 @@ public class viewer : MonoBehaviour {
 		{
 			rotate_camera(rotation_mode);
 		}
-
 		if(menu.getOverMenu() != true) {
 			if(Input.GetMouseButtonDown (0)==true && menu.getAction_mode()==1)
 				create_coreelement ();
@@ -169,8 +181,6 @@ public class viewer : MonoBehaviour {
 				select_object();
 			}
 		}
-
-
 	}
 
 	void objectdirection()
@@ -232,6 +242,104 @@ public class viewer : MonoBehaviour {
 		if(Input.GetAxis ("Mouse 3")<0)
 		Camera.main.transform.Translate(Vector3.back*Time.deltaTime*speed);
 	}
+	/**
+	 * visible_by_cam (true) -> returns closest rendered object from List coreelements 
+	 * 				  (false)-> returns closest object from List coreelements
+	 * 
+	 * 
+	 * 
+	 * **/
+	public GameObject getClosest_element(bool visible_by_cam)
+	{
+		float distance = 0f;
+
+		if(coreelements.Count>0 && visible_by_cam)
+		{
+			if(visible_by_cam)
+			{
+				foreach(GameObject element in coreelements)
+				{
+					if(is_visible(element)==true)
+					{
+						float new_dist=(element.transform.position-Camera.main.transform.position).magnitude;
+						if(distance==0f)
+						{
+							distance=new_dist;
+							elm=element;
+						}
+						if(new_dist<distance)
+						{
+							if(coreelements.Count==1)
+							{
+								distance=new_dist;
+								elm=element;
+							}
+							else
+							{
+								distance=new_dist;
+								elm=element;
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				foreach(GameObject element in coreelements)
+				{
+					float new_dist=(element.transform.position-Camera.main.transform.position).magnitude;
+					if(distance==0f)
+					{
+						distance=new_dist;
+						elm=element;
+					}
+					if(new_dist<distance)
+					{
+						distance=new_dist;
+						elm=element;
+					}
+				}
+			}
+		}
+		return elm;
+	}
+
+
+	/*public Vector3 ()
+	{
+		float distance = 0f;
+		Vector3 point = new Vector3();
+		if(coreelements.Count>0)
+			foreach(GameObject element in coreelements)
+		{
+			if(renderer.isVisible)
+			{
+				float new_dist=(element.transform.position-Camera.main.transform.position).magnitude;
+				if(new_dist<distance)
+				{
+					distance=new_dist;
+					elm=elment;
+					point = elm.transform.position;
+				}
+			}
+		}
+		return point;
+	}
+	*/
+	GameObject lock_element(GameObject element)
+	{
+		locked_element=element;
+		return locked_element;
+	}
+	bool is_visible(GameObject element)
+	{
+		if(element.renderer.isVisible==true)
+			return true;
+		else
+			return false;
+
+	}
+
 	void rotate_camera(int rotation_mode)
 	{
 
@@ -244,17 +352,38 @@ public class viewer : MonoBehaviour {
 				Camera.main.transform.Rotate (-motiony,motionx,0);
 				break;
 			case 2:
-				Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+
+			if(is_visible(getClosest_element(true)))
+			{
 				Screen.lockCursor=true;
-				speed = int.Parse(menu.getConfig("rotate_speed").ToString());
-				motionx = speed*Input.GetAxis ("Mouse X")*Time.deltaTime;
-				motiony = speed*Input.GetAxis ("Mouse Y")*Time.deltaTime;
+				if(element_locked==true)
+				{
+					speed = int.Parse(menu.getConfig("rotate_speed").ToString());
+					motionx = speed*Input.GetAxis ("Mouse X")*Time.deltaTime;
+					motiony = speed*Input.GetAxis ("Mouse Y")*Time.deltaTime;
+					Vector3 focus = locked_element.transform.position;
+					Camera.main.gameObject.transform.LookAt(focus);
+					print (focus);
+					Camera.main.transform.RotateAround(focus,Vector3.up,motionx);
+					Camera.main.transform.RotateAround(focus,Vector3.left,motiony);
+				}
+				else
+				{
+					lock_element(getClosest_element(true));
+					element_locked=true;
+				}
+			}
+				/*Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+					speed = int.Parse(menu.getConfig("rotate_speed").ToString());
+					motionx = speed*Input.GetAxis ("Mouse X")*Time.deltaTime;
+					motiony = speed*Input.GetAxis ("Mouse Y")*Time.deltaTime;
+
 				float dist = 20f;
 				Vector3 focus = ray.direction*dist;
 				Camera.main.gameObject.transform.LookAt(focus);
-				print (focus);
 				Camera.main.transform.RotateAround(focus,Vector3.up,motionx);
 				Camera.main.transform.RotateAround(focus,Vector3.left,motiony);
+				*/
 				break;
 			default:
 				break;
@@ -267,9 +396,6 @@ public class viewer : MonoBehaviour {
 			delight_object(element);
 		}
 	}
-
-
-
 	public void delight_object(GameObject element)
 	{
 		if(element.gameObject.transform.childCount>1)
@@ -394,7 +520,6 @@ public class viewer : MonoBehaviour {
 		{
 			x = x+"|"+item.Key.name.ToString()+" -> "+item.Value.name.ToString();
 		}
-		print(x);
 	}
 	public void destroyElement(GameObject element) {
 		if(!relations.Count.Equals(0)) {
