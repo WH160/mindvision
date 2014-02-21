@@ -7,15 +7,16 @@ using System.Collections.Generic;
 
 public class menu : MonoBehaviour {
 
-	private Rect initWindow;
-	private Rect projectWindow;
-	private Rect inspectELementWindow;
-	private Rect messageWindow;
-	private Rect RelationWindowRect = new Rect(0,300,250,420);
+	private Rect initWindowRect;
+	private Rect projectWindowRect;
+	private Rect inspectELementWindowRect;
+	private Rect messageWindowRect;
+	private Rect RelationWindowRect;
 	private Rect ToolbarWindowRect;					// toolbar with selectable tools
 	private Rect ElementWindowRect; // shows each element as button
+	private Rect SelectWindowRect;
 	
-	private int buttonpressed = 0;
+	private int initWindowRectSelect = 0;
 	private int save = 0;
 	
 	private Boolean message = false;
@@ -30,6 +31,7 @@ public class menu : MonoBehaviour {
 	private Boolean render = true;
 	private Boolean debugmode = false;
 	private Boolean move_mode_conf = false;
+	private Boolean menu_animation = true;
 	
 	// For Elements
 	private Boolean inspectElementVar = false;
@@ -54,14 +56,10 @@ public class menu : MonoBehaviour {
 	
 	public GUISkin menuSkin;
 	private Boolean overMenu;
-	private int leftProjectWindow;
-	private int topProjectWindow;
-	private int leftInitWindow;
-	private int topInitWindow;
-	private int leftToolbarWindow;
-	private int topToolbarWindow;
-	private int leftElementWindow;
-	private int topElementWindow;
+	private Dictionary<string, float> menu_pos_stand_visible = new Dictionary<string, float>();
+	private Dictionary<string, float> menu_pos_stand_invisible = new Dictionary<string, float>();
+	private Dictionary<string, float> menu_pos = new Dictionary<string, float>();
+
 	/** Constructor
 	 * 
 	 * reads configfile, if existing, otherwise it creates it with standardparameter
@@ -72,16 +70,112 @@ public class menu : MonoBehaviour {
 	 * @return	void
 	 */
 	void Start () {
-		leftInitWindow = -220;
-		leftProjectWindow = -260;
-		topProjectWindow = 50;
-		topInitWindow = 50;
-		leftToolbarWindow = -220;
-		topToolbarWindow = 50;
-		leftElementWindow = 0;
-		topElementWindow = 50;
+		menu_pos_stand_visible.Add("top_ProjectWindowRectNew",90);
+		menu_pos_stand_visible.Add("left_ProjectWindowRectNew",220);
+		menu_pos_stand_visible.Add("leftStep_ProjectWindowRectNew",46);
+		menu_pos_stand_visible.Add("x_ProjectWindowRectNew",400);
+		menu_pos_stand_visible.Add("y_ProjectWindowRectNew",260);
 
-		initWindow = new Rect(leftInitWindow,20,220,240);
+		menu_pos_stand_visible.Add("top_ProjectWindowRectExisting",140);
+		menu_pos_stand_visible.Add("left_ProjectWindowRectExisting",220);
+		menu_pos_stand_visible.Add("leftStep_ProjectWindowRectExisting",48);
+		menu_pos_stand_visible.Add("x_ProjectWindowRectExisting",400);
+		menu_pos_stand_visible.Add("y_ProjectWindowRectExisting",400);
+
+		menu_pos_stand_visible.Add("top_ProjectWindowRectOption",190);
+		menu_pos_stand_visible.Add("left_ProjectWindowRectOption",220);
+		menu_pos_stand_visible.Add("leftStep_ProjectWindowRectOption",52);
+		menu_pos_stand_visible.Add("x_ProjectWindowRectOption",450);
+		menu_pos_stand_visible.Add("y_ProjectWindowRectOption",510);
+
+		menu_pos_stand_visible.Add("top_ProjectWindowRectQuit",240);
+		menu_pos_stand_visible.Add("left_ProjectWindowRectQuit",220);
+		menu_pos_stand_visible.Add("leftStep_ProjectWindowRectQuit",48);
+		menu_pos_stand_visible.Add("x_ProjectWindowRectQuit",400);
+		menu_pos_stand_visible.Add("y_ProjectWindowRectQuit",210);
+
+		menu_pos_stand_invisible.Add("top_ProjectWindowRectNew",100);
+		menu_pos_stand_invisible.Add("left_ProjectWindowRectNew",-240);
+		menu_pos_stand_invisible.Add("leftStep_ProjectWindowRectNew",-10);
+		menu_pos_stand_invisible.Add("x_ProjectWindowRectNew",300);
+		menu_pos_stand_invisible.Add("y_ProjectWindowRectNew",50);
+		
+		menu_pos_stand_invisible.Add("top_ProjectWindowRectExisting",100);
+		menu_pos_stand_invisible.Add("left_ProjectWindowRectExisting",-260);
+		menu_pos_stand_invisible.Add("leftStep_ProjectWindowRectExisting",-10);
+		menu_pos_stand_invisible.Add("x_ProjectWindowRectExisting",300);
+		menu_pos_stand_invisible.Add("y_ProjectWindowRectExisting",50);
+		
+		menu_pos_stand_invisible.Add("top_ProjectWindowRectOption",460);
+		menu_pos_stand_invisible.Add("left_ProjectWindowRectOption",-300);
+		menu_pos_stand_invisible.Add("leftStep_ProjectWindowRectOption",-10);
+		menu_pos_stand_invisible.Add("x_ProjectWindowRectOption",220);
+		menu_pos_stand_invisible.Add("y_ProjectWindowRectOption",50);
+		
+		menu_pos_stand_invisible.Add("top_ProjectWindowRectQuit",220);
+		menu_pos_stand_invisible.Add("left_ProjectWindowRectQuit",-260);
+		menu_pos_stand_invisible.Add("leftStep_ProjectWindowRectQuit",48);
+		menu_pos_stand_invisible.Add("x_ProjectWindowRectQuit",220);
+		menu_pos_stand_invisible.Add("y_ProjectWindowRectQuit",50);
+
+
+		menu_pos_stand_visible.Add("left_ToolbarWindowRect",0);
+		menu_pos_stand_visible.Add("leftStep_ToolbarWindowRect",22);
+		menu_pos_stand_visible.Add("top_ToolbarWindowRect",50);
+		menu_pos_stand_visible.Add("x_ToolbarWindowRect",220);
+		menu_pos_stand_visible.Add("y_ToolbarWindowRect",240);
+
+		menu_pos_stand_invisible.Add("left_ToolbarWindowRect",-220);
+		menu_pos_stand_invisible.Add("leftStep_ToolbarWindowRect",-10);
+		menu_pos_stand_invisible.Add("top_ToolbarWindowRect",50);
+		menu_pos_stand_invisible.Add("x_ToolbarWindowRect",220);
+		menu_pos_stand_invisible.Add("y_ToolbarWindowRect",50);
+
+
+		menu_pos_stand_visible.Add("left_InitWindowRect",0);
+		menu_pos_stand_visible.Add("leftStep_InitWindowRect",22);
+		menu_pos_stand_visible.Add("top_InitWindowRect",50);
+		menu_pos_stand_visible.Add("x_InitWindowRect",220);
+		menu_pos_stand_visible.Add("y_InitWindowRect",240);
+
+		menu_pos_stand_invisible.Add("left_InitWindowRect",-220);
+		menu_pos_stand_invisible.Add("leftStep_InitWindowRect",-10);
+		menu_pos_stand_invisible.Add("top_InitWindowRect",50);
+		menu_pos_stand_invisible.Add("x_InitWindowRect",220);
+		menu_pos_stand_invisible.Add("y_InitWindowRect",50);
+
+
+		menu_pos_stand_invisible.Add("left_ElementWindowRect",Screen.width);
+		menu_pos_stand_invisible.Add("leftStep_ElementWindowRect",10);
+		menu_pos_stand_invisible.Add("top_ElementWindowRect",50);
+		menu_pos_stand_invisible.Add("x_ElementWindowRect",300);
+		menu_pos_stand_invisible.Add("y_ElementWindowRect",50);
+
+		menu_pos_stand_visible.Add("left_ElementWindowRect",Screen.width-300);
+		menu_pos_stand_visible.Add("leftStep_ElementWindowRect",30);
+		menu_pos_stand_visible.Add("top_ElementWindowRect",50);
+		menu_pos_stand_visible.Add("x_ElementWindowRect",300);
+		menu_pos_stand_visible.Add("y_ElementWindowRect",500);
+
+
+		menu_pos_stand_visible.Add("left_RelationWindowRect",0);
+		menu_pos_stand_visible.Add("leftStep_RelationWindowRect",60);
+		menu_pos_stand_visible.Add("top_RelationWindowRect",420);
+		menu_pos_stand_visible.Add("x_RelationWindowRect",300);
+		menu_pos_stand_visible.Add("y_RelationWindowRect",500);
+
+		menu_pos_stand_invisible.Add("left_RelationWindowRect",-300);
+		menu_pos_stand_invisible.Add("leftStep_RelationWindowRect",-60);
+		menu_pos_stand_invisible.Add("top_RelationWindowRect",420);
+		menu_pos_stand_invisible.Add("x_RelationWindowRect",300);
+		menu_pos_stand_invisible.Add("y_RelationWindowRect",50);
+
+
+
+		foreach(KeyValuePair<string,float> pair in menu_pos_stand_invisible) {
+			menu_pos.Add(pair.Key,pair.Value);
+		}
+
 		viewer = GameObject.Find("viewer").GetComponent<viewer>();
 		// projectpath wich should be created
 		string configFile = System.IO.Path.Combine(@Application.dataPath, "mindvision.conf");
@@ -99,6 +193,7 @@ public class menu : MonoBehaviour {
 				sw.WriteLine ("move_speed>100");
 				sw.WriteLine ("zoom_speed>100");
 				sw.WriteLine ("rotate_speed>100");
+				sw.WriteLine ("menu_animation>True");
 			}
 			showMessage("Das Configfile wurde nicht gefunden. Standardwerte wurden geladen.");
 			// project successful created
@@ -126,21 +221,21 @@ public class menu : MonoBehaviour {
 		tmp_windowLocation = windowLocation;
 		debugmode = (Standard["debugmode"].ToString()=="True") ? true : false;
 		move_mode_conf = (Standard["move_mode"].ToString()=="True") ? true : false;
+		menu_animation = (Standard["menu_animation"].ToString()=="True") ? true : false;
 		console("Debugmode: "+debugmode.ToString());
 		overMenu = false;
 	}
 	
-	/** initializes GUI with initWindow
+	/** initializes GUI with initWindowRect
 	 * 
 	 * 	@param	void
 	 * 	@return void
 	 */
 	void OnGUI() {
 		GUI.skin = menuSkin;
-		switch(buttonpressed) {
+		switch(initWindowRectSelect) {
 		case (1):
-			projectWindow = new Rect(leftProjectWindow,60,400,topProjectWindow);
-			projectWindow = GUI.Window (1, projectWindow, projectWindowNew, "Neues Projekt");
+			projectWindowRect = GUI.Window (1, projectWindowRect, projectWindowNew, "Neues Projekt");
 			switch(save) {
 			case(1):
 				console ("project exists");
@@ -156,39 +251,41 @@ public class menu : MonoBehaviour {
 			save = 0;
 			break;
 		case (2):
-			projectWindow = new Rect(leftProjectWindow,110,400,topProjectWindow);
-			projectWindow = GUI.Window (1, projectWindow, projectWindowExisting, "Projekt öffnen");
+			projectWindowRect = GUI.Window (1, projectWindowRect, projectWindowExisting, "Projekt öffnen");
 			break;
 		case (3):
-			projectWindow = new Rect(leftProjectWindow,160,400,topProjectWindow);
-			projectWindow = GUI.Window (1, projectWindow, projectWindowOptions, "Optionen");
+			projectWindowRect = GUI.Window (1, projectWindowRect, projectWindowOptions, "Optionen");
 			break;
 		case (4):
-			projectWindow = new Rect(leftProjectWindow,210,400,topProjectWindow);
-			projectWindow = GUI.Window (1, projectWindow, projectWindowQuit, "Beenden");
+			projectWindowRect = GUI.Window (1, projectWindowRect, projectWindowQuit, "Beenden");
 			break;
 		default:
 			break;
 		}
 		GUI.BringWindowToBack(1);
-		initWindow = GUI.Window (0, initWindow, initWindowFunc, "Start");
+		initWindowRect = GUI.Window (0, initWindowRect, initWindowFunc, "Start");
 			
 		ToolbarWindowRect = GUI.Window(3,ToolbarWindowRect,toolbox,"Werkzeuge");
+
+		GUI.BringWindowToBack(8);
+		SelectWindowRect = GUI.Window(8,SelectWindowRect,SelectWindowFunc,"");
+
 		ElementWindowRect = GUI.Window (5,ElementWindowRect, showElements ,"Gadget Inspector");
+
 		if(inspectElementVar) {
-			inspectELementWindow = GUI.Window (4, inspectELementWindow, inspectElementForm, "Inspect Element:" + Element.name.ToString());
+			inspectELementWindowRect = GUI.Window (4, inspectELementWindowRect, inspectElementForm, "Inspect Element:" + Element.name.ToString());
 		}
 
 		if(message) {
-			messageWindow = new Rect (( Screen.width/2  - 400/2 ),( Screen.height/2  - 500/2 ),500,300);
-			messageWindow = GUI.Window (6, messageWindow, messageOutput, "Nachricht");
+			messageWindowRect = new Rect (( Screen.width/2  - 400/2 ),( Screen.height/2  - 500/2 ),500,300);
+			messageWindowRect = GUI.Window (6, messageWindowRect, messageOutput, "Nachricht");
 		}
 				
 		if(action_mode == 2) {
 			RelationWindowRect = GUI.Window (7, RelationWindowRect, relationOutput, "Relation");
 		}
 
-		if(inspectELementWindow.Contains(Event.current.mousePosition) || 
+		if(inspectELementWindowRect.Contains(Event.current.mousePosition) || 
 		   ToolbarWindowRect.Contains(Event.current.mousePosition) || 
 		   ElementWindowRect.Contains(Event.current.mousePosition)
 		   )  {
@@ -203,65 +300,128 @@ public class menu : MonoBehaviour {
 
 	void FixedUpdate() {
 		if(render) {
-			leftToolbarWindow = -220;
-			topToolbarWindow = 50;
-			leftElementWindow = 0;
-			topElementWindow = 50;
+			showView(0);
+		} else {
+			showView(1);
+		}
+	}
 
-			if(leftInitWindow<0) {
-				leftInitWindow += 20;
-			} else {
-				if(topInitWindow<240) {
-					topInitWindow += 24;
-				}
+	void showView(int view) {
+		switch(view) {
+		case 0:
+			invisibleView(0);
+			visibleWindow("InitWindowRect");
+			switch(initWindowRectSelect) {
+			case 1:
+				visibleWindow("ProjectWindowRectNew");
+				projectWindowRect = makeRect("ProjectWindowRectNew");
+				break;
+			case 2:
+				visibleWindow("ProjectWindowRectExisting");
+				projectWindowRect = makeRect("ProjectWindowRectExisting");
+				break;
+			case 3:
+				visibleWindow("ProjectWindowRectOption");
+				projectWindowRect = makeRect("ProjectWindowRectOption");
+				break;
+			case 4:
+				visibleWindow("ProjectWindowRectQuit");
+				projectWindowRect = makeRect("ProjectWindowRectQuit");
+				break;
+			default:
+				break;
 			}
+			initWindowRect = makeRect("InitWindowRect");
+			break;
+		case 1:
+			invisibleView(1);
+			visibleWindow("ToolbarWindowRect");
+			ToolbarWindowRect = makeRect("ToolbarWindowRect");
+			visibleWindow("ElementWindowRect");
+			ElementWindowRect = makeRect("ElementWindowRect");
+			if(action_mode==2) {
+				visibleWindow("RelationWindowRect");
+				RelationWindowRect = makeRect("RelationWindowRect");
+			} else {
+				invisibleWindow("RelationWindowRect");
+				RelationWindowRect = makeRect("RelationWindowRect");
+			}
+			break;
+		}
+	}
 
-			if(buttonpressed==1 || buttonpressed==2 || buttonpressed==3 || buttonpressed==4) {
-				if(leftProjectWindow<220) {
-					leftProjectWindow += 20;
-				} else {
-					if(topProjectWindow<255 && buttonpressed == 1) {
-						topProjectWindow+= 255/10;
-					}
-					if(topProjectWindow<400 && buttonpressed == 2) {
-						topProjectWindow+= 40;
-					}
-					if(topProjectWindow<460 && buttonpressed == 3) {
-						topProjectWindow+= 46;
-					}
-					if(topProjectWindow<220 && buttonpressed == 4) {
-						topProjectWindow+= 20;
-					}
+	void invisibleView(int view) {
+		switch (view) {
+		case 0:
+			invisibleWindow("ToolbarWindowRect");
+			ToolbarWindowRect = makeRect("ToolbarWindowRect");
+			invisibleWindow("ElementWindowRect");
+			ElementWindowRect = makeRect("ElementWindowRect");
+			invisibleWindow("RelationWindowRect");
+			RelationWindowRect = makeRect("RelationWindowRect");
+			action_mode = 0;
+			break;
+		case 1:
+			invisibleAllProjectWindows();
+			invisibleWindow("InitWindowRect");
+			initWindowRect = makeRect("InitWindowRect");
+			projectWindowRect = makeRect("ProjectWindowRectNew");
+			initWindowRectSelect = 0;
+			break;
+		default:
+			break;
+		}
+	}
+
+	void invisibleWindow(string key) {
+		menu_pos["left_"+key] = menu_pos_stand_invisible["left_"+key];
+		menu_pos["top_"+key] = menu_pos_stand_invisible["top_"+key];
+		menu_pos["x_"+key] = menu_pos_stand_invisible["x_"+key];
+		menu_pos["y_"+key] = menu_pos_stand_invisible["y_"+key];
+	}
+
+	void visibleWindow(string key) {
+		if(this.getConfig("menu_animation").ToString()=="True") {
+			if(menu_pos_stand_visible["left_"+key]>menu_pos_stand_invisible["left_"+key]) {
+				if(menu_pos["left_"+key]<menu_pos_stand_visible["left_"+key]) {
+					menu_pos["left_"+key] += menu_pos_stand_visible["leftStep_"+key];
+				} else if(menu_pos["y_"+key]<menu_pos_stand_visible["y_"+key]) {
+					menu_pos["y_"+key]+=(menu_pos_stand_visible["y_"+key]/10);
 				}
-			//	projectWindow = new Rect(leftProjectWindow,60,400,260);
+			} else {
+				if(menu_pos["left_"+key]>menu_pos_stand_visible["left_"+key]) {
+					menu_pos["left_"+key] -= menu_pos_stand_visible["leftStep_"+key];
+				} else if(menu_pos["y_"+key]<menu_pos_stand_visible["y_"+key]) {
+					menu_pos["y_"+key]+=(menu_pos_stand_visible["y_"+key]/10);
+				} 
 			}
 		} else {
-			leftInitWindow = -220;
-			topInitWindow = 50;
-			topProjectWindow = 50;
-			leftProjectWindow = 0;
-			buttonpressed = 0;
-
-			if(leftToolbarWindow<0) {
-				leftToolbarWindow += 20;
-			} else {
-				if(topToolbarWindow<240) {
-					topToolbarWindow += 24;
-				}
-			}
-
-			if(leftElementWindow<300) {
-				leftElementWindow += 30;
-			} else {
-				if(topElementWindow<500) {
-					topElementWindow += 50;
-				}
-			}
-
+			menu_pos["left_"+key] = this.menu_pos_stand_visible["left_"+key];
+			menu_pos["y_"+key] = this.menu_pos_stand_visible["y_"+key];
 		}
-		initWindow = new Rect(leftInitWindow,20,220,topInitWindow);
-		ToolbarWindowRect = new Rect(leftToolbarWindow,20,220,topToolbarWindow);
-		ElementWindowRect = new Rect(Screen.width-leftElementWindow,20,300, topElementWindow);
+		menu_pos["x_"+key] = menu_pos_stand_visible["x_"+key];
+		menu_pos["top_"+key] = menu_pos_stand_visible["top_"+key];
+	}
+
+	void invisibleAllWindows() {
+		foreach(string key in menu_pos_stand_invisible.Keys) {
+			//print(key+":"+menu_pos[key] + "->" + menu_pos_stand_invisible[key]);
+			menu_pos[key] = this.menu_pos_stand_invisible[key];
+		}
+	}
+
+	void invisibleAllProjectWindows() {
+		invisibleWindow("ProjectWindowRectNew");
+		invisibleWindow("ProjectWindowRectExisting");
+		invisibleWindow("ProjectWindowRectOption");
+		invisibleWindow("ProjectWindowRectQuit");
+	}
+
+	Rect makeRect(string key) {
+		return new Rect(this.menu_pos["left_"+key.ToString()],
+		                this.menu_pos["top_"+key.ToString()],
+		                this.menu_pos["x_"+key.ToString()],
+		                this.menu_pos["y_"+key.ToString()]);
 	}
 	/** 
 	 * 
@@ -276,6 +436,11 @@ public class menu : MonoBehaviour {
 	 * 
 	 * 
 	 */
+	void SelectWindowFunc(int windowID) {
+		if(GUI.Button (new Rect(0, 40, 220, 50),"desel")) {
+			viewer.delight_all();
+		}
+	}
 	void relationOutput(int windowID) {
 		GUI.Label(new Rect(10,50,250,200),viewer.getStart());
 		GUI.Label(new Rect(10,200,250,200),viewer.getEnd());
@@ -350,12 +515,13 @@ public class menu : MonoBehaviour {
 		
 		if (GUI.Button (new Rect (10, 250, 200, 50), "Speichern")) {
 			viewer.setCoreElementPosition(Element,position);
-			inspectELementWindow = new Rect(250,200,0,0);
+			inspectELementWindowRect = new Rect(250,200,0,0);
+			viewer.delight_object(Element);
 		}
 		if (GUI.Button (new Rect (220, 250, 200, 50), "Löschen")) {
 			viewer.destroyElement(Element);
 			this.inspectElementVar = false;
-			inspectELementWindow = new Rect(250,200,0,0);
+			inspectELementWindowRect = new Rect(250,200,0,0);
 		}
 		
 		GUI.DragWindow ();
@@ -379,31 +545,27 @@ public class menu : MonoBehaviour {
 		// Button -> new Project
 		if (GUI.Button (new Rect (0, 40, 220, 50), "neues Projekt...")) {
 			console ("click -> new project (from: " + initWindowId + ")");
-			leftProjectWindow=-260;
-			topProjectWindow = 50;
-			buttonpressed = 1;
+			initWindowRectSelect = 1;
+			invisibleAllProjectWindows();
 		}
 		// Button -> open project
 		if (GUI.Button (new Rect (0, 90, 220, 50), "Projekt öffnen...")) {
 			console ("click -> open existing project (from: " + initWindowId + ")");
-			leftProjectWindow=-260;
-			topProjectWindow = 50;
-			buttonpressed = 2;
+			initWindowRectSelect = 2;
+			invisibleAllProjectWindows();
 		}
 		// Button -> options
 		if (GUI.Button (new Rect (0, 140, 220, 50), "Optionen")) {
 			console ("click -> open options (from: " + initWindowId + ")");
-			leftProjectWindow=-260;
-			topProjectWindow = 50;
-			buttonpressed = 3;
+			initWindowRectSelect = 3;
+			invisibleAllProjectWindows();
 		}
 		//Quit
 		if (GUI.Button (new Rect (0, 190, 220, 50), "Beenden")) {
 			console ("click -> quit (from: " + initWindowId + ")");
 			console ("click -> open quitdialog (from: " + initWindowId + ")");
-			leftProjectWindow=-260;
-			topProjectWindow = 50;
-			buttonpressed = 4;
+			initWindowRectSelect = 4;
+			invisibleAllProjectWindows();
 		}
 		
 	}
@@ -414,7 +576,7 @@ public class menu : MonoBehaviour {
 			Application.Quit();
 		}
 		if (GUI.Button (new Rect (210, 150, 180, 50), "Nein")) {
-			buttonpressed=0;
+			initWindowRectSelect=0;
 		}
 	}
 	
@@ -439,7 +601,7 @@ public class menu : MonoBehaviour {
 		}
 		
 		if (GUI.Button (new Rect (210, 200, 180, 50), "Abbrechen")) {
-			buttonpressed = 0;
+			initWindowRectSelect = 0;
 		}
 		//GUI.DragWindow ();
 	}
@@ -509,38 +671,41 @@ public class menu : MonoBehaviour {
 	 * 	@return	void
 	 */
 	void projectWindowOptions(int initWindowId) {
-		GUI.Label (new Rect (20, 50, 120, 50), "Projektpfad:");
-		Standard["Location"] = GUI.TextField(new Rect(140,50,250,40),Standard["Location"].ToString(),255);
+		GUI.Label (new Rect (20, 50, 170, 50), "Projektpfad:");
+		Standard["Location"] = GUI.TextField(new Rect(190,50,250,40),Standard["Location"].ToString(),255);
 		
-		GUI.Label (new Rect (20, 100, 120, 50), "Debugmode:");
-		debugmode = GUI.Toggle(new Rect(140, 100, 100, 50), debugmode, "An / Aus");
+		GUI.Label (new Rect (20, 100, 170, 50), "Debugmode:");
+		debugmode = GUI.Toggle(new Rect(190, 100, 100, 50), debugmode, "An / Aus");
+
+		GUI.Label (new Rect (20, 150, 170, 50), "Menu Animation:");
+		menu_animation = GUI.Toggle(new Rect(190, 150, 100, 50), menu_animation, "An / Aus");
 		
+		GUI.Label (new Rect (20, 200, 450, 50), "Kamera (Geschwindigkeit):");
+		GUI.Label (new Rect (40, 250, 150, 50), "Zoom:");
+		Standard["zoom_speed"] = GUI.TextField(new Rect(190,250,250,40),Standard["zoom_speed"].ToString(),255);
 		
-		GUI.Label (new Rect (20, 150, 400, 50), "Kamera (Geschwindigkeit):");
-		GUI.Label (new Rect (40, 200, 100, 50), "Zoom:");
-		Standard["zoom_speed"] = GUI.TextField(new Rect(140,200,250,40),Standard["zoom_speed"].ToString(),255);
+		GUI.Label (new Rect (40, 300, 150, 50), "Bewegung:");
+		Standard["move_speed"] = GUI.TextField(new Rect(190,300,250,40),Standard["move_speed"].ToString(),255);
 		
-		GUI.Label (new Rect (40, 250, 100, 50), "Bewegung:");
-		Standard["move_speed"] = GUI.TextField(new Rect(140,250,250,40),Standard["move_speed"].ToString(),255);
+		GUI.Label (new Rect (40, 350, 150, 50), "Drehen:");
+		Standard["rotate_speed"] = GUI.TextField(new Rect(190,350,250,40),Standard["rotate_speed"].ToString(),255);
 		
-		GUI.Label (new Rect (40, 300, 100, 50), "Drehen:");
-		Standard["rotate_speed"] = GUI.TextField(new Rect(140,300,250,40),Standard["rotate_speed"].ToString(),255);
-		
-		GUI.Label (new Rect (40, 350, 100, 50), "Maus:");
-		move_mode_conf = GUI.Toggle(new Rect(140, 350, 250, 40), move_mode_conf, " invertieren");
+		GUI.Label (new Rect (40, 400, 150, 50), "Maus:");
+		move_mode_conf = GUI.Toggle(new Rect(190, 400, 250, 40), move_mode_conf, " invertieren");
 		
 		Standard["rotate_speed"] = rgx.Replace(Standard["rotate_speed"].ToString(), "");
 		Standard["move_speed"] = rgx.Replace(Standard["move_speed"].ToString(), "");
 		Standard["zoom_speed"] = rgx.Replace(Standard["zoom_speed"].ToString(), "");
 		
 		// save project
-		if (GUI.Button (new Rect (10, 400, 180, 50), "Speichern")) {
+		if (GUI.Button (new Rect (10, 450, 205, 50), "Speichern")) {
 			save = saveOptions (initWindowId);
 			Standard["move_mode"] = this.move_mode_conf.ToString();
+			Standard["menu_animation"] = this.menu_animation.ToString();
 			showMessage("Config geschrieben.");
 		}
-		if (GUI.Button (new Rect (210, 400, 180, 50), "Abbrechen")) {
-			buttonpressed = 0;
+		if (GUI.Button (new Rect (230, 450, 205, 50), "Abbrechen")) {
+			initWindowRectSelect = 0;
 		}
 		GUI.DragWindow ();
 	}
@@ -568,7 +733,7 @@ public class menu : MonoBehaviour {
 			Element.transform.position.y.ToString(),
 			Element.transform.position.z.ToString()
 		};
-		inspectELementWindow = new Rect(250,200,430,310);
+		inspectELementWindowRect = new Rect(250,200,430,310);
 		this.inspectElementVar = true;
 	}
 	
@@ -711,9 +876,10 @@ public class menu : MonoBehaviour {
 		using (StreamWriter sw = File.CreateText(configFile)) {
 			sw.WriteLine ("debugmode>" + debugmode.ToString());
 			sw.WriteLine ("move_mode>" + move_mode_conf.ToString());
+			sw.WriteLine ("menu_animation>" + move_mode_conf.ToString());
 			foreach(string key in Standard.Keys)
 			{
-				if(key != "debugmode" && key != "move_mode")
+				if(key != "debugmode" && key != "move_mode" && key != "menu_animation")
 					sw.WriteLine (key.ToString() + ">" + Standard[key].ToString());
 			}
 		}
