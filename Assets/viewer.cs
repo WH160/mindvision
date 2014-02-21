@@ -236,26 +236,26 @@ public class viewer : MonoBehaviour {
 		int mode=rotation_mode;
 		switch(mode){
 			case 1:
-			speed= int.Parse(menu.getConfig("rotate_speed").ToString());
-			float motionx = speed*Input.GetAxis ("Mouse X")*Time.deltaTime;
-			float motiony = speed*Input.GetAxis ("Mouse Y")*Time.deltaTime;
-			Camera.main.transform.Rotate (-motiony,motionx,0);
-			break;
+				speed= int.Parse(menu.getConfig("rotate_speed").ToString());
+				float motionx = speed*Input.GetAxis ("Mouse X")*Time.deltaTime;
+				float motiony = speed*Input.GetAxis ("Mouse Y")*Time.deltaTime;
+				Camera.main.transform.Rotate (-motiony,motionx,0);
+				break;
 			case 2:
-			Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
-			Screen.lockCursor=true;
-			speed = int.Parse(menu.getConfig("rotate_speed").ToString());
-			motionx = speed*Input.GetAxis ("Mouse X")*Time.deltaTime;
-			motiony = speed*Input.GetAxis ("Mouse Y")*Time.deltaTime;
-			float dist = 20f;
-			Vector3 focus = ray.direction*dist;
-			Camera.main.gameObject.transform.LookAt(focus);
-			print (focus);
-			Camera.main.transform.RotateAround(focus,Vector3.up,motionx);
-			Camera.main.transform.RotateAround(focus,Vector3.left,motiony);
-			break;
-		default:
-			break;
+				Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+				Screen.lockCursor=true;
+				speed = int.Parse(menu.getConfig("rotate_speed").ToString());
+				motionx = speed*Input.GetAxis ("Mouse X")*Time.deltaTime;
+				motiony = speed*Input.GetAxis ("Mouse Y")*Time.deltaTime;
+				float dist = 20f;
+				Vector3 focus = ray.direction*dist;
+				Camera.main.gameObject.transform.LookAt(focus);
+				print (focus);
+				Camera.main.transform.RotateAround(focus,Vector3.up,motionx);
+				Camera.main.transform.RotateAround(focus,Vector3.left,motiony);
+				break;
+			default:
+				break;
 		}
 	}
 	public void delight_all()

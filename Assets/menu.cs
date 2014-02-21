@@ -322,6 +322,7 @@ public class menu : MonoBehaviour {
 		scrollPos = GUI.BeginScrollView(scrollViewRect, scrollPos, gridRect);
 		
 		selected = GUI.SelectionGrid(gridRect, selected, gridStrings, gridWidth);
+		//selected = GUI.Toolbar(gridRect,selected,gridStrings);
 		if(selected!=-1) {
 			inspectElement(coreelements[selected]);
 			viewer.enlight_object(coreelements[selected]);
