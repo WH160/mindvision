@@ -8,6 +8,7 @@ using System.Collections.Generic;
 public class menu : MonoBehaviour {
 
 	private Rect initWindowRect;
+	private Rect initWindowRecttmp;
 	private Rect projectWindowRect;
 	private Rect inspectELementWindowRect;
 	private Rect messageWindowRect;
