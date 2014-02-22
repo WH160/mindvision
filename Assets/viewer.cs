@@ -333,21 +333,19 @@ public class viewer : MonoBehaviour {
 				Camera.main.transform.Rotate (-motiony,motionx,0);
 				break;
 			case 2:
-
-			if(is_visible(getClosest_element(true)))
-			{
-				Screen.lockCursor=true;
-				if(element_locked==true)
+				if(is_visible(getClosest_element(true)))
 				{
-					rotate_by_point(Camera.main.gameObject,locked_element.transform.position);
+					Screen.lockCursor=true;
+					if(element_locked==true)
+					{
+						rotate_by_point(Camera.main.gameObject,locked_element.transform.position);
+					}
+					else
+					{
+						lock_element(getClosest_element(true), Camera.main);
+						element_locked=true;
+					}
 				}
-				else
-				{
-					lock_element(getClosest_element(true), Camera.main);
-					element_locked=true;
-				}
-			}
-				
 				break;
 			default:
 				break;
@@ -371,7 +369,7 @@ public class viewer : MonoBehaviour {
 	void unlock_fokus()
 	{
 		rotationfocus.transform.DetachChildren();
-		Destroy (rotationfocus);
+		rotationfocus = null;
 	}
 	GameObject lock_fokus(Vector3 position)
 	{
