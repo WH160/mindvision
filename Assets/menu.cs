@@ -12,6 +12,7 @@ public class menu : MonoBehaviour {
 	private Rect inspectELementWindowRect;
 	private Rect messageWindowRect;
 	private Rect RelationWindowRect;
+	private Rect chooseElementWindowRect;
 	private Rect ToolbarWindowRect;					// toolbar with selectable tools
 	private Rect ElementWindowRect; // shows each element as button
 	private Rect SelectWindowRect;
@@ -57,8 +58,10 @@ public class menu : MonoBehaviour {
 	public GUISkin menuSkin;
 	private Boolean overMenu;
 	private Dictionary<string, float> menu_pos_stand_visible = new Dictionary<string, float>();
+	private Dictionary<string, float> menu_pos_stand_manipulated = new Dictionary<string, float>();
 	private Dictionary<string, float> menu_pos_stand_invisible = new Dictionary<string, float>();
 	private Dictionary<string, float> menu_pos = new Dictionary<string, float>();
+
 
 	/** Constructor
 	 * 
@@ -75,48 +78,56 @@ public class menu : MonoBehaviour {
 		menu_pos_stand_visible.Add("leftStep_ProjectWindowRectNew",46);
 		menu_pos_stand_visible.Add("x_ProjectWindowRectNew",400);
 		menu_pos_stand_visible.Add("y_ProjectWindowRectNew",260);
+		menu_pos_stand_visible.Add("yStep_ProjectWindowRectNew",21);
 
 		menu_pos_stand_visible.Add("top_ProjectWindowRectExisting",140);
 		menu_pos_stand_visible.Add("left_ProjectWindowRectExisting",220);
 		menu_pos_stand_visible.Add("leftStep_ProjectWindowRectExisting",48);
 		menu_pos_stand_visible.Add("x_ProjectWindowRectExisting",400);
 		menu_pos_stand_visible.Add("y_ProjectWindowRectExisting",400);
+		menu_pos_stand_visible.Add("yStep_ProjectWindowRectExisting",35);
 
 		menu_pos_stand_visible.Add("top_ProjectWindowRectOption",190);
 		menu_pos_stand_visible.Add("left_ProjectWindowRectOption",220);
 		menu_pos_stand_visible.Add("leftStep_ProjectWindowRectOption",52);
 		menu_pos_stand_visible.Add("x_ProjectWindowRectOption",450);
 		menu_pos_stand_visible.Add("y_ProjectWindowRectOption",510);
+		menu_pos_stand_visible.Add("yStep_ProjectWindowRectOption",46);
 
 		menu_pos_stand_visible.Add("top_ProjectWindowRectQuit",240);
 		menu_pos_stand_visible.Add("left_ProjectWindowRectQuit",220);
 		menu_pos_stand_visible.Add("leftStep_ProjectWindowRectQuit",48);
 		menu_pos_stand_visible.Add("x_ProjectWindowRectQuit",400);
 		menu_pos_stand_visible.Add("y_ProjectWindowRectQuit",210);
+		menu_pos_stand_visible.Add("yStep_ProjectWindowRectQuit",16);
 
 		menu_pos_stand_invisible.Add("top_ProjectWindowRectNew",100);
 		menu_pos_stand_invisible.Add("left_ProjectWindowRectNew",-240);
 		menu_pos_stand_invisible.Add("leftStep_ProjectWindowRectNew",-10);
 		menu_pos_stand_invisible.Add("x_ProjectWindowRectNew",300);
 		menu_pos_stand_invisible.Add("y_ProjectWindowRectNew",50);
+		menu_pos_stand_invisible.Add("yStep_ProjectWindowRectNew",10);
 		
 		menu_pos_stand_invisible.Add("top_ProjectWindowRectExisting",100);
 		menu_pos_stand_invisible.Add("left_ProjectWindowRectExisting",-260);
 		menu_pos_stand_invisible.Add("leftStep_ProjectWindowRectExisting",-10);
 		menu_pos_stand_invisible.Add("x_ProjectWindowRectExisting",300);
 		menu_pos_stand_invisible.Add("y_ProjectWindowRectExisting",50);
+		menu_pos_stand_invisible.Add("yStep_ProjectWindowRectExisting",10);
 		
 		menu_pos_stand_invisible.Add("top_ProjectWindowRectOption",460);
 		menu_pos_stand_invisible.Add("left_ProjectWindowRectOption",-300);
 		menu_pos_stand_invisible.Add("leftStep_ProjectWindowRectOption",-10);
 		menu_pos_stand_invisible.Add("x_ProjectWindowRectOption",220);
 		menu_pos_stand_invisible.Add("y_ProjectWindowRectOption",50);
+		menu_pos_stand_invisible.Add("yStep_ProjectWindowRectOption",10);
 		
 		menu_pos_stand_invisible.Add("top_ProjectWindowRectQuit",220);
 		menu_pos_stand_invisible.Add("left_ProjectWindowRectQuit",-260);
 		menu_pos_stand_invisible.Add("leftStep_ProjectWindowRectQuit",48);
 		menu_pos_stand_invisible.Add("x_ProjectWindowRectQuit",220);
 		menu_pos_stand_invisible.Add("y_ProjectWindowRectQuit",50);
+		menu_pos_stand_invisible.Add("yStep_ProjectWindowRectQuit",10);
 
 
 		menu_pos_stand_visible.Add("left_ToolbarWindowRect",0);
@@ -124,12 +135,14 @@ public class menu : MonoBehaviour {
 		menu_pos_stand_visible.Add("top_ToolbarWindowRect",50);
 		menu_pos_stand_visible.Add("x_ToolbarWindowRect",220);
 		menu_pos_stand_visible.Add("y_ToolbarWindowRect",240);
+		menu_pos_stand_visible.Add("yStep_ToolbarWindowRect",19);
 
 		menu_pos_stand_invisible.Add("left_ToolbarWindowRect",-220);
 		menu_pos_stand_invisible.Add("leftStep_ToolbarWindowRect",-10);
 		menu_pos_stand_invisible.Add("top_ToolbarWindowRect",50);
 		menu_pos_stand_invisible.Add("x_ToolbarWindowRect",220);
 		menu_pos_stand_invisible.Add("y_ToolbarWindowRect",50);
+		menu_pos_stand_invisible.Add("yStep_ToolbarWindowRect",19);
 
 
 		menu_pos_stand_visible.Add("left_InitWindowRect",0);
@@ -137,12 +150,14 @@ public class menu : MonoBehaviour {
 		menu_pos_stand_visible.Add("top_InitWindowRect",50);
 		menu_pos_stand_visible.Add("x_InitWindowRect",220);
 		menu_pos_stand_visible.Add("y_InitWindowRect",240);
+		menu_pos_stand_visible.Add("yStep_InitWindowRect",19);
 
 		menu_pos_stand_invisible.Add("left_InitWindowRect",-220);
 		menu_pos_stand_invisible.Add("leftStep_InitWindowRect",-10);
 		menu_pos_stand_invisible.Add("top_InitWindowRect",50);
 		menu_pos_stand_invisible.Add("x_InitWindowRect",220);
 		menu_pos_stand_invisible.Add("y_InitWindowRect",50);
+		menu_pos_stand_invisible.Add("yStep_InitWindowRect",10);
 
 
 		menu_pos_stand_invisible.Add("left_ElementWindowRect",Screen.width);
@@ -150,30 +165,48 @@ public class menu : MonoBehaviour {
 		menu_pos_stand_invisible.Add("top_ElementWindowRect",50);
 		menu_pos_stand_invisible.Add("x_ElementWindowRect",300);
 		menu_pos_stand_invisible.Add("y_ElementWindowRect",50);
+		menu_pos_stand_invisible.Add("yStep_ElementWindowRect",10);
 
 		menu_pos_stand_visible.Add("left_ElementWindowRect",Screen.width-300);
 		menu_pos_stand_visible.Add("leftStep_ElementWindowRect",30);
 		menu_pos_stand_visible.Add("top_ElementWindowRect",50);
 		menu_pos_stand_visible.Add("x_ElementWindowRect",300);
 		menu_pos_stand_visible.Add("y_ElementWindowRect",500);
+		menu_pos_stand_visible.Add("yStep_ElementWindowRect",45);
 
 
 		menu_pos_stand_visible.Add("left_RelationWindowRect",0);
 		menu_pos_stand_visible.Add("leftStep_RelationWindowRect",60);
-		menu_pos_stand_visible.Add("top_RelationWindowRect",420);
-		menu_pos_stand_visible.Add("x_RelationWindowRect",300);
-		menu_pos_stand_visible.Add("y_RelationWindowRect",500);
+		menu_pos_stand_visible.Add("top_RelationWindowRect",240);
+		menu_pos_stand_visible.Add("x_RelationWindowRect",220);
+		menu_pos_stand_visible.Add("y_RelationWindowRect",310);
+		menu_pos_stand_visible.Add("yStep_RelationWindowRect",26);
 
 		menu_pos_stand_invisible.Add("left_RelationWindowRect",-300);
 		menu_pos_stand_invisible.Add("leftStep_RelationWindowRect",-60);
 		menu_pos_stand_invisible.Add("top_RelationWindowRect",420);
 		menu_pos_stand_invisible.Add("x_RelationWindowRect",300);
 		menu_pos_stand_invisible.Add("y_RelationWindowRect",50);
+		menu_pos_stand_invisible.Add("yStep_RelationWindowRect",10);
 
 
+		menu_pos_stand_visible.Add("left_chooseElementWindowRect",0);
+		menu_pos_stand_visible.Add("leftStep_chooseElementWindowRect",60);
+		menu_pos_stand_visible.Add("top_chooseElementWindowRect",140);
+		menu_pos_stand_visible.Add("x_chooseElementWindowRect",220);
+		menu_pos_stand_visible.Add("y_chooseElementWindowRect",310);
+		menu_pos_stand_visible.Add("yStep_chooseElementWindowRect",26);
+		
+		menu_pos_stand_invisible.Add("left_chooseElementWindowRect",-300);
+		menu_pos_stand_invisible.Add("leftStep_chooseElementWindowRect",-60);
+		menu_pos_stand_invisible.Add("top_chooseElementWindowRect",140);
+		menu_pos_stand_invisible.Add("x_chooseElementWindowRect",300);
+		menu_pos_stand_invisible.Add("y_chooseElementWindowRect",50);
+		menu_pos_stand_invisible.Add("yStep_chooseElementWindowRect",10);
 
 		foreach(KeyValuePair<string,float> pair in menu_pos_stand_invisible) {
 			menu_pos.Add(pair.Key,pair.Value);
+			menu_pos_stand_manipulated.Add(pair.Key,menu_pos_stand_visible[pair.Key]);
 		}
 
 		viewer = GameObject.Find("viewer").GetComponent<viewer>();
@@ -239,10 +272,10 @@ public class menu : MonoBehaviour {
 			switch(save) {
 			case(1):
 				console ("project exists");
-				showMessage("Das Projekt existiert bereits!");
+				showMessage("Das Projekt existiert bereits!",50,50);
 				break;
 			case(2):
-				showMessage("Das Projekt wurde erfolgreich angelegt.");
+				showMessage("Das Projekt wurde erfolgreich angelegt.",50,50);
 				console ("saved");
 				break;
 			default:
@@ -277,10 +310,12 @@ public class menu : MonoBehaviour {
 		}
 
 		if(message) {
-			messageWindowRect = new Rect (( Screen.width/2  - 400/2 ),( Screen.height/2  - 500/2 ),500,300);
 			messageWindowRect = GUI.Window (6, messageWindowRect, messageOutput, "Nachricht");
 		}
 				
+		if(action_mode == 0) {
+			chooseElementWindowRect = GUI.Window(7,chooseElementWindowRect,chooseElementOutput,"Maus");
+		}
 		if(action_mode == 2) {
 			RelationWindowRect = GUI.Window (7, RelationWindowRect, relationOutput, "Relation");
 		}
@@ -296,7 +331,6 @@ public class menu : MonoBehaviour {
 		}
 		
 	}
-
 
 	void FixedUpdate() {
 		if(render) {
@@ -339,12 +373,18 @@ public class menu : MonoBehaviour {
 			ToolbarWindowRect = makeRect("ToolbarWindowRect");
 			visibleWindow("ElementWindowRect");
 			ElementWindowRect = makeRect("ElementWindowRect");
-			if(action_mode==2) {
+
+			switch(action_mode) {
+			case 2:
 				visibleWindow("RelationWindowRect");
+				invisibleWindow("chooseElementWindowRect");
 				RelationWindowRect = makeRect("RelationWindowRect");
-			} else {
+				break;
+			case 0:
 				invisibleWindow("RelationWindowRect");
+				visibleWindow("chooseElementWindowRect");
 				RelationWindowRect = makeRect("RelationWindowRect");
+				break;
 			}
 			break;
 		}
@@ -382,25 +422,25 @@ public class menu : MonoBehaviour {
 
 	void visibleWindow(string key) {
 		if(this.getConfig("menu_animation").ToString()=="True") {
-			if(menu_pos_stand_visible["left_"+key]>menu_pos_stand_invisible["left_"+key]) {
-				if(menu_pos["left_"+key]<menu_pos_stand_visible["left_"+key]) {
-					menu_pos["left_"+key] += menu_pos_stand_visible["leftStep_"+key];
-				} else if(menu_pos["y_"+key]<menu_pos_stand_visible["y_"+key]) {
-					menu_pos["y_"+key]+=(menu_pos_stand_visible["y_"+key]/10);
+			if(menu_pos_stand_manipulated["left_"+key]>menu_pos_stand_invisible["left_"+key]) {
+				if(menu_pos["left_"+key]<menu_pos_stand_manipulated["left_"+key]) {
+					menu_pos["left_"+key] += menu_pos_stand_manipulated["leftStep_"+key];
+				} else if(menu_pos["y_"+key]<menu_pos_stand_manipulated["y_"+key]) {
+					menu_pos["y_"+key]+=menu_pos_stand_manipulated["yStep_"+key];
 				}
 			} else {
-				if(menu_pos["left_"+key]>menu_pos_stand_visible["left_"+key]) {
-					menu_pos["left_"+key] -= menu_pos_stand_visible["leftStep_"+key];
-				} else if(menu_pos["y_"+key]<menu_pos_stand_visible["y_"+key]) {
-					menu_pos["y_"+key]+=(menu_pos_stand_visible["y_"+key]/10);
+				if(menu_pos["left_"+key]>menu_pos_stand_manipulated["left_"+key]) {
+					menu_pos["left_"+key] -= menu_pos_stand_manipulated["leftStep_"+key];
+				} else if(menu_pos["y_"+key]<menu_pos_stand_manipulated["y_"+key]) {
+					menu_pos["y_"+key]+=menu_pos_stand_manipulated["yStep_"+key];
 				} 
 			}
 		} else {
-			menu_pos["left_"+key] = this.menu_pos_stand_visible["left_"+key];
-			menu_pos["y_"+key] = this.menu_pos_stand_visible["y_"+key];
+			menu_pos["left_"+key] = this.menu_pos_stand_manipulated["left_"+key];
+			menu_pos["y_"+key] = this.menu_pos_stand_manipulated["y_"+key];
 		}
-		menu_pos["x_"+key] = menu_pos_stand_visible["x_"+key];
-		menu_pos["top_"+key] = menu_pos_stand_visible["top_"+key];
+		menu_pos["x_"+key] = menu_pos_stand_manipulated["x_"+key];
+		menu_pos["top_"+key] = menu_pos_stand_manipulated["top_"+key];
 	}
 
 	void invisibleAllWindows() {
@@ -409,7 +449,13 @@ public class menu : MonoBehaviour {
 			menu_pos[key] = this.menu_pos_stand_invisible[key];
 		}
 	}
-
+	void manipulateMenuPos(string key,float value) {
+		menu_pos_stand_manipulated[key] = value;
+	}
+	void standardMenuPos(string key) {
+		menu_pos_stand_manipulated[key] = menu_pos_stand_visible[key];
+		menu_pos[key] = menu_pos_stand_manipulated[key];
+	}
 	void invisibleAllProjectWindows() {
 		invisibleWindow("ProjectWindowRectNew");
 		invisibleWindow("ProjectWindowRectExisting");
@@ -447,21 +493,47 @@ public class menu : MonoBehaviour {
 	}
 	void toolbox(int windowID)
 	{
-		if(GUI.Button (new Rect(0, 40, 220, 50),"Maus")) {
-			action_mode=0;
-//			viewer.showTmp();
+		float[] y_menu = new float[4] {menu_pos_stand_manipulated["y_ToolbarWindowRect"]-200f, menu_pos_stand_manipulated["y_ToolbarWindowRect"]-150f,menu_pos_stand_manipulated["y_ToolbarWindowRect"]-100f,menu_pos_stand_manipulated["y_ToolbarWindowRect"]-50f};
+		if(action_mode == 0) {
+			y_menu[0] = menu_pos_stand_visible["y_ToolbarWindowRect"]-200f;
 		}
-		if(GUI.Button (new Rect (0, 90, 220, 50), "Element"))
+		if(action_mode == 1) {
+			y_menu[0] = menu_pos_stand_visible["y_ToolbarWindowRect"]-200f;
+			y_menu[1] = menu_pos_stand_visible["y_ToolbarWindowRect"]-150f;
+		}
+		if(action_mode == 2) {
+			y_menu[0] = menu_pos_stand_visible["y_ToolbarWindowRect"]-200f;
+			y_menu[1] = menu_pos_stand_visible["y_ToolbarWindowRect"]-150f;
+			y_menu[2] = menu_pos_stand_visible["y_ToolbarWindowRect"]-100f;
+		}
+
+		if(GUI.Button (new Rect(0, y_menu[0], 220, 50),"Element auswählen")) {
+			this.manipulateMenuPos("yStep_ToolbarWindowRect",31);
+			this.manipulateMenuPos("y_ToolbarWindowRect",550);
+			action_mode=0;
+		}
+		if(GUI.Button (new Rect (0, y_menu[1], 220, 50), "Element erstellen"))
 		{
+			this.manipulateMenuPos("yStep_ToolbarWindowRect",31);
+			this.manipulateMenuPos("y_ToolbarWindowRect",550);
 			action_mode=1;
 			elementnr=2;
 		}
-		if (GUI.Button (new Rect (0, 140, 220, 50), "verbinden")) {
+		if (GUI.Button (new Rect (0, y_menu[2], 220, 50), "verbinden")) {
+			this.manipulateMenuPos("yStep_ToolbarWindowRect",31);
+			this.manipulateMenuPos("y_ToolbarWindowRect",550);
 			action_mode = 2;
 			viewer.relation_storage();
 		}
-		if (GUI.Button (new Rect (0, 190, 220, 50), "Menü")) {
+		if (GUI.Button (new Rect (0, y_menu[3], 220, 50), "Menü")) {
 			render = true;
+			this.standardMenuPos("y_ToolbarWindowRect");
+			this.standardMenuPos("yStep_ToolbarWindowRect");
+		}
+	}
+	void chooseElementOutput(int windowID) {
+		if(GUI.Button (new Rect(0, 50, 220, 50),"Element bewegen")) {
+
 		}
 	}
 	
@@ -744,6 +816,13 @@ public class menu : MonoBehaviour {
 	
 	public void showMessage(string message) {
 		this.messageTxt = message.ToString();
+		messageWindowRect = new Rect (( Screen.width/2  - 400/2 ),( Screen.height/2  - 500/2 ),500,300);
+		this.message = true;
+	}
+
+	public void showMessage(string message, int x_pos, int y_pos) {
+		this.messageTxt = message.ToString();
+		messageWindowRect = new Rect (x_pos,y_pos,500,300);
 		this.message = true;
 	}
 	public Boolean getOverMenu() {
