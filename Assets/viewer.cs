@@ -84,7 +84,7 @@ public class viewer : MonoBehaviour {
 	List<LineRenderer> tmp_list;
 
 	bool element_locked;
-	
+	bool focus_locked;
 	int i;							//default index
 	int inspect_mode;
 	int tool;						//type of tool
@@ -106,6 +106,7 @@ public class viewer : MonoBehaviour {
 	List<LineRenderer> selectedRelations;
 
 	public void Start(){
+		speed=100;
 		locked_dist = 0f;
 		element_locked=false;
 		locked_element=null;
@@ -144,6 +145,8 @@ public class viewer : MonoBehaviour {
 				Screen.lockCursor=false;
 				element_locked=false;
 			}
+			if(focus_locked==true)
+				unlock_fokus();
 		}
 	}
 	bool mouselocked(){
@@ -336,7 +339,7 @@ public class viewer : MonoBehaviour {
 				if(is_visible(getClosest_element(true)))
 				{
 					Screen.lockCursor=true;
-					if(element_locked==true)
+					if(element_locked==true&&rotationfocus_locked()==true)
 					{
 						rotate_by_point(Camera.main.gameObject,locked_element.transform.position);
 					}
@@ -344,6 +347,7 @@ public class viewer : MonoBehaviour {
 					{
 						lock_element(getClosest_element(true), Camera.main);
 						element_locked=true;
+						create_rotationfokus(getClosest_element(true).transform.position);
 					}
 				}
 				break;
@@ -351,31 +355,48 @@ public class viewer : MonoBehaviour {
 				break;
 		}
 	}
+
 	void rotate_by_point(GameObject camera, Vector3 target)
 	{
-		if(rotationfocus!=null)
+		if(focus_locked==true)
 		{
-			float yRotation = rotationfocus.transform.localEulerAngles.y;
-			float y =yRotation+speed*Input.GetAxis("Mouse X")*Time.deltaTime;
+			speed=float.Parse(menu.getConfig("move_speed").ToString());
 			camera.transform.parent = rotationfocus.transform;
-			Vector3 angle = new Vector3(0,0,y);
-			rotationfocus.transform.localEulerAngles = angle;
+			float yRotation = rotationfocus.transform.rotation.y;
+			float xRotation = rotationfocus.transform.rotation.x;
+			float y =yRotation+Input.GetAxis("Mouse X");
+			float x =xRotation+Input.GetAxis ("Mouse Y");
+			Quaternion rotation = Quaternion.Euler(x,y,0);
+			rotationfocus.transform.rotation =Quaternion.Slerp(rotationfocus.transform.rotation,rotation,Time.deltaTime);
 		}
+	}
+	bool rotationfocus_locked()
+	{
+		if(focus_locked==true)
+			return true;
 		else
-		{
-			lock_fokus(target);
-		}
+			return false;
 	}
 	void unlock_fokus()
 	{
-		rotationfocus.transform.DetachChildren();
-		rotationfocus = null;
+		if(focus_locked==true)
+		{
+			rotationfocus.transform.DetachChildren();
+			Destroy(rotationfocus);
+			focus_locked=false;
+		}
 	}
-	GameObject lock_fokus(Vector3 position)
+	void lock_focus()
 	{
-		GameObject rotationfocus = new GameObject();
+		focus_locked=true;
+	}
+	GameObject create_rotationfokus(Vector3 position)
+	{
+		rotationfocus=new GameObject();
 		rotationfocus.transform.position=position;
 		rotationfocus.name="rotationfocus";
+		Camera.main.transform.LookAt(rotationfocus.transform.position);
+		lock_focus();
 		return rotationfocus;
 	}
 	public void delight_all()
@@ -424,7 +445,38 @@ public class viewer : MonoBehaviour {
 			torch.gameObject.transform.LookAt(element.transform.position);
 		}
 	}
-
+	public void enlight_all()
+	{
+		if(coreelements.Count>0)
+		{
+			foreach(GameObject element in coreelements)
+			{
+				if(element.gameObject.transform.childCount>1)
+				{
+					Transform[] children;
+					children = element.GetComponentsInChildren<Transform>();
+					foreach(Transform child in children)
+					{
+						if(child.tag == "torch")
+							Destroy(child.gameObject);
+					}
+				}
+				if(element)
+				{
+					GameObject torch = new GameObject();
+					torch.AddComponent<Light>();
+					torch.light.color = Color.yellow;
+					torch.light.type = LightType.Spot;
+					torch.light.intensity = 10;
+					torch.tag="torch";
+					torch.transform.parent = element.transform;
+					light_position (element);
+					torch.transform.position = torchpos;
+					torch.gameObject.transform.LookAt(element.transform.position);
+				}
+			}
+		}
+	}
 	void light_position(GameObject element)
 	{
 		Vector3 obj = element.transform.position;
