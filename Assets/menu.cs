@@ -449,7 +449,7 @@ public class menu : MonoBehaviour {
 	{
 		if(GUI.Button (new Rect(0, 40, 220, 50),"Maus")) {
 			action_mode=0;
-			viewer.showTmp();
+//			viewer.showTmp();
 		}
 		if(GUI.Button (new Rect (0, 90, 220, 50), "Element"))
 		{

@@ -69,6 +69,7 @@ public class viewer : MonoBehaviour {
 	Vector3 maxZ;
 	Vector3 position;
 
+	float locked_dist;				//magnitude of vector3 camera.main to locked element
 	float tmp;
 	float motionx;					//motion value for x-axe (cameramotion)
 	float motiony;					//motion value for y-axe (cameramotion)
@@ -96,7 +97,7 @@ public class viewer : MonoBehaviour {
 	GameObject torch = null;
 	GameObject selectedObject = null;
 	public GameObject locked_element;
-
+	public GameObject rotationfocus;
 
 	menu menu;
 
@@ -105,9 +106,12 @@ public class viewer : MonoBehaviour {
 	List<LineRenderer> selectedRelations;
 
 	public void Start(){
+		locked_dist = 0f;
 		element_locked=false;
 		locked_element=null;
 		GameObject elm = null;
+		GameObject rotationfocus = null;
+
 		rotation_mode=2;
 		store = 1;
 		move_mode = 1;
@@ -304,31 +308,10 @@ public class viewer : MonoBehaviour {
 		return elm;
 	}
 
-
-	/*public Vector3 ()
-	{
-		float distance = 0f;
-		Vector3 point = new Vector3();
-		if(coreelements.Count>0)
-			foreach(GameObject element in coreelements)
-		{
-			if(renderer.isVisible)
-			{
-				float new_dist=(element.transform.position-Camera.main.transform.position).magnitude;
-				if(new_dist<distance)
-				{
-					distance=new_dist;
-					elm=elment;
-					point = elm.transform.position;
-				}
-			}
-		}
-		return point;
-	}
-	*/
-	GameObject lock_element(GameObject element)
+	GameObject lock_element(GameObject element, Camera cam)
 	{
 		locked_element=element;
+		locked_dist=(element.transform.position-cam.transform.position).magnitude;
 		return locked_element;
 	}
 	bool is_visible(GameObject element)
@@ -337,12 +320,10 @@ public class viewer : MonoBehaviour {
 			return true;
 		else
 			return false;
-
 	}
 
 	void rotate_camera(int rotation_mode)
 	{
-
 		int mode=rotation_mode;
 		switch(mode){
 			case 1:
@@ -358,36 +339,46 @@ public class viewer : MonoBehaviour {
 				Screen.lockCursor=true;
 				if(element_locked==true)
 				{
-					speed = int.Parse(menu.getConfig("rotate_speed").ToString());
-					motionx = speed*Input.GetAxis ("Mouse X")*Time.deltaTime;
-					motiony = speed*Input.GetAxis ("Mouse Y")*Time.deltaTime;
-					Vector3 focus = locked_element.transform.position;
-					Camera.main.gameObject.transform.LookAt(focus);
-					print (focus);
-					Camera.main.transform.RotateAround(focus,Vector3.up,motionx);
-					Camera.main.transform.RotateAround(focus,Vector3.left,motiony);
+					rotate_by_point(Camera.main.gameObject,locked_element.transform.position);
 				}
 				else
 				{
-					lock_element(getClosest_element(true));
+					lock_element(getClosest_element(true), Camera.main);
 					element_locked=true;
 				}
 			}
-				/*Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
-					speed = int.Parse(menu.getConfig("rotate_speed").ToString());
-					motionx = speed*Input.GetAxis ("Mouse X")*Time.deltaTime;
-					motiony = speed*Input.GetAxis ("Mouse Y")*Time.deltaTime;
-
-				float dist = 20f;
-				Vector3 focus = ray.direction*dist;
-				Camera.main.gameObject.transform.LookAt(focus);
-				Camera.main.transform.RotateAround(focus,Vector3.up,motionx);
-				Camera.main.transform.RotateAround(focus,Vector3.left,motiony);
-				*/
+				
 				break;
 			default:
 				break;
 		}
+	}
+	void rotate_by_point(GameObject camera, Vector3 target)
+	{
+		if(rotationfocus!=null)
+		{
+			float yRotation = rotationfocus.transform.localEulerAngles.y;
+			float y =yRotation+speed*Input.GetAxis("Mouse X")*Time.deltaTime;
+			camera.transform.parent = rotationfocus.transform;
+			Vector3 angle = new Vector3(0,0,y);
+			rotationfocus.transform.localEulerAngles = angle;
+		}
+		else
+		{
+			lock_fokus(target);
+		}
+	}
+	void unlock_fokus()
+	{
+		rotationfocus.transform.DetachChildren();
+		Destroy (rotationfocus);
+	}
+	GameObject lock_fokus(Vector3 position)
+	{
+		GameObject rotationfocus = new GameObject();
+		rotationfocus.transform.position=position;
+		rotationfocus.name="rotationfocus";
+		return rotationfocus;
 	}
 	public void delight_all()
 	{
@@ -514,13 +505,7 @@ public class viewer : MonoBehaviour {
 			}
 		}
 	}
-	public void showTmp() {
-		string x="";
-		foreach(var item in coreelements_relations)
-		{
-			x = x+"|"+item.Key.name.ToString()+" -> "+item.Value.name.ToString();
-		}
-	}
+
 	public void destroyElement(GameObject element) {
 		if(!relations.Count.Equals(0)) {
 			coreelements_relations_tmp = new ListWithDuplicates();
@@ -540,7 +525,7 @@ public class viewer : MonoBehaviour {
 				coreelements_relations.Remove(relation);
 			}
 		}
-		this.showTmp();
+		//this.showTmp();
 		coreelements.Remove(element);
 		Destroy (element, 0f);
 	}
