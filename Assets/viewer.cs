@@ -39,6 +39,16 @@ public class viewer : MonoBehaviour {
 			} 
 			return bunchOfData;
 		}
+		public LineRenderer GetRelation(GameObject obj1, GameObject obj2) {
+			List<LineRenderer> obj1_lines = this.Get(obj1);
+			List<LineRenderer> obj2_lines = this.Get(obj2);
+			foreach(LineRenderer line1 in obj1_lines) {
+				foreach(LineRenderer line2 in obj2_lines) {
+					if(line1 == line2) return line1;
+				}
+			}
+			return null;
+		}
 		public List<GameObject> GetKeys(LineRenderer line) {
 			List<GameObject> bunchOfObjects = new List<GameObject>();
 			foreach (KeyValuePair<GameObject, LineRenderer> data in this) {
@@ -47,6 +57,19 @@ public class viewer : MonoBehaviour {
 				}
 			} 
 			return bunchOfObjects;
+		}
+
+		public List<GameObject> GetConnectedElements(GameObject elm) {
+			List<LineRenderer> bunchOfLines = Get(elm);
+			List<GameObject> objects = new List<GameObject>();
+			foreach(LineRenderer line in bunchOfLines) {
+				List<GameObject> objectsForLine = GetKeys(line);
+				foreach(GameObject Gameobject in objectsForLine) {
+					if(!objects.Contains(Gameobject) && Gameobject != elm)
+						objects.Add(Gameobject);
+				}
+			}
+			return objects;
 		}
 	}
 
@@ -186,6 +209,10 @@ public class viewer : MonoBehaviour {
 			if(Input.GetMouseButtonDown(0)==true && menu.getAction_mode ()==0)
 			{
 				select_object();
+			}
+			if(Input.GetMouseButtonDown(0)==true && menu.getAction_mode ()==3)
+			{
+				deselect_object();
 			}
 		}
 	}
@@ -485,8 +512,18 @@ public class viewer : MonoBehaviour {
 		torchpos = obj-torchposnorm*2;
 	}
 
-
-	Boolean create_relation(Vector3 start, Vector3 end, GameObject obj1, GameObject obj2)
+	public Boolean delete_relation(GameObject obj1, GameObject obj2) {
+		LineRenderer line = this.coreelements_relations.GetRelation(obj1,obj2);
+		if(line != null) {
+			relations.Remove(line);
+			this.coreelements_relations.Remove(line);
+			Destroy(line);
+			return true;
+		} else {
+			return false;
+		}
+	}
+	public Boolean create_relation(Vector3 start, Vector3 end, GameObject obj1, GameObject obj2)
 	{
 		if(obj1 && obj2) {
 			// kopiert prefab objekt
@@ -525,10 +562,25 @@ public class viewer : MonoBehaviour {
 		
 		if(selectedObject) return true; else return false;
 	}
+	Boolean deselect_object()
+	{
+		RaycastHit hit;
+		if(Physics.Raycast(Camera.main.ScreenPointToRay (Input.mousePosition), out hit))
+		{
+			selectedObject = hit.transform.gameObject;
+			delight_object(selectedObject);
+		}
+		else{
+			selectedObject=null;
+		}
+		
+		if(selectedObject) return true; else return false;
+	}
 	public void relation_storage()
 	{
 		if(store==1)
 		{
+			delight_all();
 			if(select_object()) {
 				start=selectedObject.transform.position;
 				start_obj = selectedObject;
@@ -602,6 +654,21 @@ public class viewer : MonoBehaviour {
 
 
 		return position;
+	}
+	public List<GameObject> GetConnectedElements(GameObject Element) {
+		return this.coreelements_relations.GetConnectedElements(Element);
+	}
+	public List<GameObject> GetNotConnectedElements(GameObject Element) {
+		List<GameObject> not_connected = new List<GameObject>();
+		List<GameObject> connected = coreelements_relations.GetConnectedElements(Element);
+		foreach(GameObject coreelement in coreelements) {
+			Boolean is_in = false;
+			foreach(GameObject connected_obj in connected) {
+				if(connected_obj == coreelement) { is_in = true; }
+			}
+			if(is_in == false && coreelement != Element) not_connected.Add(coreelement); 
+		}
+		return not_connected;
 	}
 	public List<GameObject> getCoreelements() {
 		return coreelements;
