@@ -391,10 +391,11 @@ public class viewer : MonoBehaviour {
 			camera.transform.parent = rotationfocus.transform;
 			float yRotation = rotationfocus.transform.rotation.y;
 			float xRotation = rotationfocus.transform.rotation.x;
-			float y =yRotation+Input.GetAxis("Mouse X");
-			float x =xRotation+Input.GetAxis ("Mouse Y");
-			Quaternion rotation = Quaternion.Euler(x,y,0);
-			rotationfocus.transform.rotation =Quaternion.Slerp(rotationfocus.transform.rotation,rotation,Time.deltaTime);
+			float y =speed*Input.GetAxis("Mouse X")*Time.deltaTime;
+			float x =speed*Input.GetAxis ("Mouse Y")*Time.deltaTime;
+
+			//Quaternion rotation = Quaternion.Euler(x,y,0);
+			rotationfocus.transform.Rotate(x,y,0);
 		}
 	}
 	bool rotationfocus_locked()
