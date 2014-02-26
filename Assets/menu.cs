@@ -68,6 +68,7 @@ public class menu : MonoBehaviour {
 	private Dictionary<string, float> menu_pos_stand_invisible = new Dictionary<string, float>();
 	private Dictionary<string, float> menu_pos = new Dictionary<string, float>();
 
+	private Hashtable buttonStyle = new Hashtable();
 
 	/** Constructor
 	 * 
@@ -254,6 +255,8 @@ public class menu : MonoBehaviour {
 		menu_pos_stand_invisible.Add("x_inspectElementWindowRect",0);
 		menu_pos_stand_invisible.Add("y_inspectElementWindowRect",0);
 		menu_pos_stand_invisible.Add("yStep_inspectElementWindowRect",0);
+
+		buttonStyle.Add("toolbox->Element","button");
 
 		foreach(KeyValuePair<string,float> pair in menu_pos_stand_invisible) {
 			menu_pos.Add(pair.Key,pair.Value);
@@ -591,8 +594,8 @@ public class menu : MonoBehaviour {
 			y_menu[1] = menu_pos_stand_visible["y_ToolbarWindowRect"]-150f;
 			y_menu[2] = menu_pos_stand_visible["y_ToolbarWindowRect"]-100f;
 		}
-
-		if(GUI.Button (new Rect(0, y_menu[0], 220, 50),"Elemente")) {
+		
+		if(GUI.Button (new Rect(0, y_menu[0], 220, 50),"Element")) {
 			this.manipulateMenuPos("yStep_ToolbarWindowRect",31);
 			this.manipulateMenuPos("y_ToolbarWindowRect",550);
 			submenu = 0;
