@@ -154,6 +154,13 @@ public class viewer : MonoBehaviour {
 
 		Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
 		Debug.DrawRay (ray.origin,ray.direction*10,Color.cyan);
+
+		Ray zaxe = new Ray(Camera.main.transform.position,Camera.main.transform.forward);
+		Debug.DrawRay (zaxe.origin,zaxe.direction*10,Color.gray);
+		Ray yaxe = new Ray(Camera.main.transform.position,Camera.main.transform.up);
+		Debug.DrawRay (yaxe.origin,yaxe.direction*10,Color.gray);
+		Ray xaxe = new Ray(Camera.main.transform.position,Camera.main.transform.right);
+		Debug.DrawRay (xaxe.origin,xaxe.direction*10,Color.gray);
 		vec3=ray.GetPoint(20);
 		mouse_pos=new Vector3(vec3.x,vec3.y,vec3.z);
 
@@ -194,9 +201,14 @@ public class viewer : MonoBehaviour {
 	void construction_mode()
 	{
 		if(Input.GetMouseButton (1))
+		{
 			move_camera();
+		}
+
 		if(Input.GetAxis("Mouse 3")!=0)
+		{
 			zoom_camera();
+		}
 		if(Input.GetMouseButton (2))
 		{
 			rotate_camera(rotation_mode);
@@ -221,10 +233,27 @@ public class viewer : MonoBehaviour {
 	{
 		foreach(GameObject element in coreelements)
 		{
-			element.transform.LookAt (Camera.main.transform.position);
+			Ray zaxe = new Ray(element.transform.position, element.transform.forward);
+			Debug.DrawRay(zaxe.origin,zaxe.direction*20,Color.red);
+			Ray yaxe = new Ray(element.transform.position, element.transform.up);
+			Debug.DrawRay(yaxe.origin,yaxe.direction*20,Color.red);
+			Ray xaxe = new Ray(element.transform.position, element.transform.right);
+			Debug.DrawRay(xaxe.origin,xaxe.direction*20,Color.red);
+
+			if(rotationfocus_locked())
+			{
+				float x = Camera.main.transform.eulerAngles.x;
+				float y = Camera.main.transform.eulerAngles.y;
+				float z = Camera.main.transform.eulerAngles.z;
+				z=360-z;
+				element.transform.LookAt (Camera.main.transform.position);
+				element.transform.rotation = Quaternion.Euler (element.transform.eulerAngles.x,element.transform.eulerAngles.y,z);
+			}
+			else
+				element.transform.LookAt (Camera.main.transform.position);
 		}
 	}
-	
+
 	void fixRelations(GameObject element) {
 		List<LineRenderer> bunchOfRelations = this.coreelements_relations.Get(element);
 		foreach(LineRenderer line in bunchOfRelations) {
@@ -354,6 +383,7 @@ public class viewer : MonoBehaviour {
 
 	void rotate_camera(int rotation_mode)
 	{
+
 		int mode=rotation_mode;
 		switch(mode){
 			case 1:
@@ -389,12 +419,12 @@ public class viewer : MonoBehaviour {
 		{
 			speed=float.Parse(menu.getConfig("move_speed").ToString());
 			camera.transform.parent = rotationfocus.transform;
-			float yRotation = rotationfocus.transform.rotation.y;
-			float xRotation = rotationfocus.transform.rotation.x;
+
+
 			float y =speed*Input.GetAxis("Mouse X")*Time.deltaTime;
 			float x =speed*Input.GetAxis ("Mouse Y")*Time.deltaTime;
 
-			//Quaternion rotation = Quaternion.Euler(x,y,0);
+
 			rotationfocus.transform.Rotate(x,y,0);
 		}
 	}
