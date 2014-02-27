@@ -9,14 +9,16 @@ public class menu : MonoBehaviour {
 
 	private Rect initWindowRect;
 	private Rect projectWindowRect;
-	private Rect inspectELementWindowRect;
+	private Rect inspectElementWindowRect;
 	private Rect messageWindowRect;
 	private Rect RelationWindowRect;
 	private Rect chooseElementWindowRect;
 	private Rect ToolbarWindowRect;					// toolbar with selectable tools
 	private Rect ElementWindowRect; // shows each element as button
 	private Rect SelectWindowRect;
-	
+	private Rect deselectAllWindowRect;
+	private Rect selectAllWindowRect;
+
 	private int initWindowRectSelect = 0;
 	private int save = 0;
 	
@@ -46,6 +48,8 @@ public class menu : MonoBehaviour {
 	public int gi_mode = 1; 				//mode of gadgetinspector
 	private List<GameObject> coreelements;	//list of coreelements
 	private Vector2 scrollPos;
+	private Vector2 scrollPosCon;
+	private Vector2 scrollPosNotCon;
 	
 	private int selected = -1;
 	private int gridWidth=1;
@@ -53,6 +57,8 @@ public class menu : MonoBehaviour {
 	private viewer viewer;
 	
 	private int action_mode; 				//move or create element
+	private int submenu;
+	private int subsubmenu;
 	private int elementnr; 					//sets type of element to place
 	
 	public GUISkin menuSkin;
@@ -62,6 +68,7 @@ public class menu : MonoBehaviour {
 	private Dictionary<string, float> menu_pos_stand_invisible = new Dictionary<string, float>();
 	private Dictionary<string, float> menu_pos = new Dictionary<string, float>();
 
+	private Hashtable buttonStyle = new Hashtable();
 
 	/** Constructor
 	 * 
@@ -176,13 +183,13 @@ public class menu : MonoBehaviour {
 
 
 		menu_pos_stand_visible.Add("left_RelationWindowRect",0);
-		menu_pos_stand_visible.Add("leftStep_RelationWindowRect",60);
+		menu_pos_stand_visible.Add("leftStep_RelationWindowRect",22);
 		menu_pos_stand_visible.Add("top_RelationWindowRect",240);
 		menu_pos_stand_visible.Add("x_RelationWindowRect",220);
 		menu_pos_stand_visible.Add("y_RelationWindowRect",310);
 		menu_pos_stand_visible.Add("yStep_RelationWindowRect",26);
 
-		menu_pos_stand_invisible.Add("left_RelationWindowRect",-300);
+		menu_pos_stand_invisible.Add("left_RelationWindowRect",-220);
 		menu_pos_stand_invisible.Add("leftStep_RelationWindowRect",-60);
 		menu_pos_stand_invisible.Add("top_RelationWindowRect",420);
 		menu_pos_stand_invisible.Add("x_RelationWindowRect",300);
@@ -191,18 +198,65 @@ public class menu : MonoBehaviour {
 
 
 		menu_pos_stand_visible.Add("left_chooseElementWindowRect",0);
-		menu_pos_stand_visible.Add("leftStep_chooseElementWindowRect",60);
+		menu_pos_stand_visible.Add("leftStep_chooseElementWindowRect",22);
 		menu_pos_stand_visible.Add("top_chooseElementWindowRect",140);
 		menu_pos_stand_visible.Add("x_chooseElementWindowRect",220);
 		menu_pos_stand_visible.Add("y_chooseElementWindowRect",310);
 		menu_pos_stand_visible.Add("yStep_chooseElementWindowRect",26);
 		
-		menu_pos_stand_invisible.Add("left_chooseElementWindowRect",-300);
+		menu_pos_stand_invisible.Add("left_chooseElementWindowRect",-220);
 		menu_pos_stand_invisible.Add("leftStep_chooseElementWindowRect",-60);
 		menu_pos_stand_invisible.Add("top_chooseElementWindowRect",140);
-		menu_pos_stand_invisible.Add("x_chooseElementWindowRect",300);
+		menu_pos_stand_invisible.Add("x_chooseElementWindowRect",220);
 		menu_pos_stand_invisible.Add("y_chooseElementWindowRect",50);
 		menu_pos_stand_invisible.Add("yStep_chooseElementWindowRect",10);
+
+
+		menu_pos_stand_visible.Add("left_selectAllWindowRect",220);
+		menu_pos_stand_visible.Add("leftStep_selectAllWindowRect",28);
+		menu_pos_stand_visible.Add("top_selectAllWindowRect",240);
+		menu_pos_stand_visible.Add("x_selectAllWindowRect",60);
+		menu_pos_stand_visible.Add("y_selectAllWindowRect",50);
+		menu_pos_stand_visible.Add("yStep_selectAllWindowRect",0);
+		
+		menu_pos_stand_invisible.Add("left_selectAllWindowRect",-60);
+		menu_pos_stand_invisible.Add("leftStep_selectAllWindowRect",10);
+		menu_pos_stand_invisible.Add("top_selectAllWindowRect",240);
+		menu_pos_stand_invisible.Add("x_selectAllWindowRect",60);
+		menu_pos_stand_invisible.Add("y_selectAllWindowRect",50);
+		menu_pos_stand_invisible.Add("yStep_selectAllWindowRect",0);
+
+
+		menu_pos_stand_visible.Add("left_deselectAllWindowRect",220);
+		menu_pos_stand_visible.Add("leftStep_deselectAllWindowRect",28);
+		menu_pos_stand_visible.Add("top_deselectAllWindowRect",190);
+		menu_pos_stand_visible.Add("x_deselectAllWindowRect",60);
+		menu_pos_stand_visible.Add("y_deselectAllWindowRect",50);
+		menu_pos_stand_visible.Add("yStep_deselectAllWindowRect",0);
+		
+		menu_pos_stand_invisible.Add("left_deselectAllWindowRect",-60);
+		menu_pos_stand_invisible.Add("leftStep_deselectAllWindowRect",10);
+		menu_pos_stand_invisible.Add("top_deselectAllWindowRect",190);
+		menu_pos_stand_invisible.Add("x_deselectAllWindowRect",60);
+		menu_pos_stand_invisible.Add("y_deselectAllWindowRect",50);
+		menu_pos_stand_invisible.Add("yStep_deselectAllWindowRect",0);
+
+
+		menu_pos_stand_visible.Add("left_inspectElementWindowRect",230);
+		menu_pos_stand_visible.Add("leftStep_inspectElementWindowRect",230);
+		menu_pos_stand_visible.Add("top_inspectElementWindowRect",50);
+		menu_pos_stand_visible.Add("x_inspectElementWindowRect",Screen.width - 540);
+		menu_pos_stand_visible.Add("y_inspectElementWindowRect",Screen.height - 100);
+		menu_pos_stand_visible.Add("yStep_inspectElementWindowRect",Screen.height - 100);
+		
+		menu_pos_stand_invisible.Add("left_inspectElementWindowRect",230);
+		menu_pos_stand_invisible.Add("leftStep_inspectElementWindowRect",0);
+		menu_pos_stand_invisible.Add("top_inspectElementWindowRect",50);
+		menu_pos_stand_invisible.Add("x_inspectElementWindowRect",0);
+		menu_pos_stand_invisible.Add("y_inspectElementWindowRect",0);
+		menu_pos_stand_invisible.Add("yStep_inspectElementWindowRect",0);
+
+		buttonStyle.Add("toolbox->Element","button");
 
 		foreach(KeyValuePair<string,float> pair in menu_pos_stand_invisible) {
 			menu_pos.Add(pair.Key,pair.Value);
@@ -298,6 +352,7 @@ public class menu : MonoBehaviour {
 		GUI.BringWindowToBack(1);
 		initWindowRect = GUI.Window (0, initWindowRect, initWindowFunc, "Start");
 			
+		GUI.BringWindowToBack(3);
 		ToolbarWindowRect = GUI.Window(3,ToolbarWindowRect,toolbox,"Werkzeuge");
 
 		GUI.BringWindowToBack(8);
@@ -306,21 +361,28 @@ public class menu : MonoBehaviour {
 		ElementWindowRect = GUI.Window (5,ElementWindowRect, showElements ,"Gadget Inspector");
 
 		if(inspectElementVar) {
-			inspectELementWindowRect = GUI.Window (4, inspectELementWindowRect, inspectElementForm, "Inspect Element:" + Element.name.ToString());
+			inspectElementWindowRect = GUI.Window (4, inspectElementWindowRect, inspectElementForm, "Inspect Element:" + Element.name.ToString());
 		}
 
 		if(message) {
 			messageWindowRect = GUI.Window (6, messageWindowRect, messageOutput, "Nachricht");
 		}
 				
-		if(action_mode == 0) {
+		if(submenu == 0) {
 			chooseElementWindowRect = GUI.Window(7,chooseElementWindowRect,chooseElementOutput,"Maus");
+			if(subsubmenu == 1) {
+				this.selectAllWindowRect = GUI.Window(9,selectAllWindowRect,selectAllOutput,"");
+			}
+			if(subsubmenu == 2) {
+				this.deselectAllWindowRect = GUI.Window(9,deselectAllWindowRect,deselectAllOutput,"");
+			}
+			GUI.BringWindowToBack(9);
 		}
-		if(action_mode == 2) {
+		if(submenu == 2) {
 			RelationWindowRect = GUI.Window (7, RelationWindowRect, relationOutput, "Relation");
 		}
 
-		if(inspectELementWindowRect.Contains(Event.current.mousePosition) || 
+		if(inspectElementWindowRect.Contains(Event.current.mousePosition) || 
 		   ToolbarWindowRect.Contains(Event.current.mousePosition) || 
 		   ElementWindowRect.Contains(Event.current.mousePosition)
 		   )  {
@@ -374,18 +436,42 @@ public class menu : MonoBehaviour {
 			visibleWindow("ElementWindowRect");
 			ElementWindowRect = makeRect("ElementWindowRect");
 
-			switch(action_mode) {
+			switch(submenu) {
 			case 2:
 				visibleWindow("RelationWindowRect");
 				invisibleWindow("chooseElementWindowRect");
-				RelationWindowRect = makeRect("RelationWindowRect");
 				break;
 			case 0:
 				invisibleWindow("RelationWindowRect");
 				visibleWindow("chooseElementWindowRect");
-				RelationWindowRect = makeRect("RelationWindowRect");
+				switch(subsubmenu) {
+				case 1:
+					print("selectAll");
+					visibleWindow("selectAllWindowRect");
+					invisibleWindow("deselectAllWindowRect");
+					break;
+				case 2:
+					print("deselectAll");
+					invisibleWindow("selectAllWindowRect");
+					visibleWindow("deselectAllWindowRect");
+					break;
+				default:
+					invisibleWindow("selectAllWindowRect");
+					invisibleWindow("deselectAllWindowRect");
+					break;
+				}
 				break;
 			}
+			if(this.inspectElementVar) {
+				visibleWindow("inspectElementWindowRect");
+			} else {
+				invisibleWindow("inspectElementWindowRect");
+			}
+			selectAllWindowRect = makeRect("selectAllWindowRect");
+			deselectAllWindowRect = makeRect("deselectAllWindowRect");
+			RelationWindowRect = makeRect("RelationWindowRect");
+			chooseElementWindowRect = makeRect("chooseElementWindowRect");
+			inspectElementWindowRect = makeRect("inspectElementWindowRect");
 			break;
 		}
 	}
@@ -399,7 +485,9 @@ public class menu : MonoBehaviour {
 			ElementWindowRect = makeRect("ElementWindowRect");
 			invisibleWindow("RelationWindowRect");
 			RelationWindowRect = makeRect("RelationWindowRect");
-			action_mode = 0;
+			action_mode = -1;
+			submenu = -1;
+			subsubmenu = -1;
 			break;
 		case 1:
 			invisibleAllProjectWindows();
@@ -494,35 +582,37 @@ public class menu : MonoBehaviour {
 	void toolbox(int windowID)
 	{
 		float[] y_menu = new float[4] {menu_pos_stand_manipulated["y_ToolbarWindowRect"]-200f, menu_pos_stand_manipulated["y_ToolbarWindowRect"]-150f,menu_pos_stand_manipulated["y_ToolbarWindowRect"]-100f,menu_pos_stand_manipulated["y_ToolbarWindowRect"]-50f};
-		if(action_mode == 0) {
+		if(submenu == 0) {
 			y_menu[0] = menu_pos_stand_visible["y_ToolbarWindowRect"]-200f;
 		}
-		if(action_mode == 1) {
+		if(submenu == 1) {
 			y_menu[0] = menu_pos_stand_visible["y_ToolbarWindowRect"]-200f;
 			y_menu[1] = menu_pos_stand_visible["y_ToolbarWindowRect"]-150f;
 		}
-		if(action_mode == 2) {
+		if(submenu == 2) {
 			y_menu[0] = menu_pos_stand_visible["y_ToolbarWindowRect"]-200f;
 			y_menu[1] = menu_pos_stand_visible["y_ToolbarWindowRect"]-150f;
 			y_menu[2] = menu_pos_stand_visible["y_ToolbarWindowRect"]-100f;
 		}
-
-		if(GUI.Button (new Rect(0, y_menu[0], 220, 50),"Element auswählen")) {
+		
+		if(GUI.Button (new Rect(0, y_menu[0], 220, 50),"Element")) {
 			this.manipulateMenuPos("yStep_ToolbarWindowRect",31);
 			this.manipulateMenuPos("y_ToolbarWindowRect",550);
-			action_mode=0;
+			submenu = 0;
 		}
-		if(GUI.Button (new Rect (0, y_menu[1], 220, 50), "Element erstellen"))
+		if(GUI.Button (new Rect (0, y_menu[1], 220, 50), "Ansicht"))
 		{
 			this.manipulateMenuPos("yStep_ToolbarWindowRect",31);
 			this.manipulateMenuPos("y_ToolbarWindowRect",550);
-			action_mode=1;
-			elementnr=2;
+			submenu = 1;
 		}
-		if (GUI.Button (new Rect (0, y_menu[2], 220, 50), "verbinden")) {
-			this.manipulateMenuPos("yStep_ToolbarWindowRect",31);
-			this.manipulateMenuPos("y_ToolbarWindowRect",550);
+		if (GUI.Button (new Rect (0, y_menu[2], 220, 50), "Relation")) {
+			if(menu_pos["left_ToolbarWindowRect"]!=550) {
+				this.manipulateMenuPos("yStep_ToolbarWindowRect",31);
+				this.manipulateMenuPos("y_ToolbarWindowRect",550);
+			}
 			action_mode = 2;
+			submenu = 2;
 			viewer.relation_storage();
 		}
 		if (GUI.Button (new Rect (0, y_menu[3], 220, 50), "Menü")) {
@@ -532,11 +622,31 @@ public class menu : MonoBehaviour {
 		}
 	}
 	void chooseElementOutput(int windowID) {
-		if(GUI.Button (new Rect(0, 50, 220, 50),"Element bewegen")) {
-
+		if(GUI.Button (new Rect(10, 0, 210, 50),"Neu")) {
+			elementnr=2;
+			action_mode = 1;
+			subsubmenu = 0;
+		}
+		if(GUI.Button (new Rect(10, 50, 210, 50),"Abwählen")) {
+			action_mode = 3;
+			subsubmenu = 2;
+		}
+		if(GUI.Button (new Rect(10, 100, 210, 50),"Auswählen")) {
+			elementnr=2;
+			action_mode = 0;
+			subsubmenu = 1;
 		}
 	}
-	
+	void selectAllOutput(int windowID) {
+		if(GUI.Button(new Rect(0,0,60,50), "alle")) {
+			viewer.enlight_all();
+		}
+	}
+	void deselectAllOutput(int windowID) {
+		if(GUI.Button(new Rect(0,0,60,50), "alle")) {
+			viewer.delight_all();
+		}
+	}
 	void showElements(int windowID)
 	{
 		coreelements = viewer.getCoreelements();
@@ -561,6 +671,7 @@ public class menu : MonoBehaviour {
 		selected = GUI.SelectionGrid(gridRect, selected, gridStrings, gridWidth);
 		//selected = GUI.Toolbar(gridRect,selected,gridStrings);
 		if(selected!=-1) {
+			viewer.delight_all();
 			inspectElement(coreelements[selected]);
 			viewer.enlight_object(coreelements[selected]);
 			selected = -1;
@@ -569,6 +680,18 @@ public class menu : MonoBehaviour {
 	}
 	
 	private void inspectElementForm(int windowId) {
+		List<GameObject> connected_objects = viewer.GetConnectedElements(Element);
+		string[] connected = this.GameObjectListToStringList(connected_objects);
+		List<GameObject> not_connected_objects = viewer.GetNotConnectedElements(Element);
+		string[] not_connected = this.GameObjectListToStringList(not_connected_objects);
+
+		Rect gridRectConnected = new Rect(0,0,(menu_pos["x_inspectElementWindowRect"]/2)-35,50*connected.Length);							// defines area of elements
+		Rect scrollgridRectConnected = new Rect (10,300,(menu_pos["x_inspectElementWindowRect"]/2)-15,Screen.height - 500);							// defines area of elements
+		Rect gridRectNotConnected = new Rect(0,0,(menu_pos["x_inspectElementWindowRect"]/2)-35,50*not_connected.Length);		
+		Rect scrollgridRectNotConnected = new Rect ((menu_pos["x_inspectElementWindowRect"]/2)+15,300,(menu_pos["x_inspectElementWindowRect"]/2)-15,Screen.height - 500);							// defines area of elements// defines area of elements
+		int connected_sel = -1;
+		int notconnected_sel = -1;
+
 		GUI.Label(new Rect(20,50,100,50),"Name:");
 		Element.name = GUI.TextField(new Rect(120,50,290,40),Element.name.ToString(),255);
 		
@@ -584,16 +707,33 @@ public class menu : MonoBehaviour {
 		position[0] = rgx.Replace(position[0], "");
 		position[1] = rgx.Replace(position[1], "");
 		position[2] = rgx.Replace(position[2], "");
-		
-		if (GUI.Button (new Rect (10, 250, 200, 50), "Speichern")) {
+
+		GUI.Label(new Rect(10,250,(menu_pos["x_inspectElementWindowRect"]/2)-15,50),"verknüpfte Elemente:");
+
+		scrollPosCon = GUI.BeginScrollView(scrollgridRectConnected, scrollPosCon, gridRectConnected);
+		connected_sel = GUI.SelectionGrid(gridRectConnected, connected_sel, connected, gridWidth);
+		if(connected_sel != -1) {
+			viewer.delete_relation(Element, connected_objects[connected_sel]);
+		}
+		GUI.EndScrollView();
+
+		GUI.Label(new Rect(10+(menu_pos["x_inspectElementWindowRect"]/2)+15,250,(menu_pos["x_inspectElementWindowRect"]/2)-15,50),"nicht verknüpfte Elemente:");
+		scrollPosNotCon = GUI.BeginScrollView(scrollgridRectNotConnected, scrollPosNotCon, gridRectNotConnected);
+		GUI.Label(new Rect((menu_pos["x_inspectElementWindowRect"]/2)+15,250,(menu_pos["x_inspectElementWindowRect"]/2)-25,50),"nicht verknüpfte Elemente:");
+		notconnected_sel = GUI.SelectionGrid(gridRectNotConnected, notconnected_sel, not_connected, gridWidth);
+		if(notconnected_sel != -1) {
+			viewer.create_relation(Element.transform.position,not_connected_objects[notconnected_sel].transform.position,Element,not_connected_objects[notconnected_sel]);
+		}
+		GUI.EndScrollView();
+		if (GUI.Button (new Rect (10, Screen.height - 160, 200, 50), "Speichern")) {
 			viewer.setCoreElementPosition(Element,position);
-			inspectELementWindowRect = new Rect(250,200,0,0);
+			invisibleWindow("inspectElementWindowRect");
 			viewer.delight_object(Element);
 		}
-		if (GUI.Button (new Rect (220, 250, 200, 50), "Löschen")) {
+		if (GUI.Button (new Rect (220, Screen.height - 160, 200, 50), "Löschen")) {
 			viewer.destroyElement(Element);
 			this.inspectElementVar = false;
-			inspectELementWindowRect = new Rect(250,200,0,0);
+			invisibleWindow("inspectElementWindowRect");
 		}
 		
 		GUI.DragWindow ();
@@ -762,7 +902,7 @@ public class menu : MonoBehaviour {
 		GUI.Label (new Rect (40, 350, 150, 50), "Drehen:");
 		Standard["rotate_speed"] = GUI.TextField(new Rect(190,350,250,40),Standard["rotate_speed"].ToString(),255);
 		
-		GUI.Label (new Rect (40, 400, 150, 50), "Maus:");
+		GUI.Label (new Rect (40, 400, 150, 50), "");
 		move_mode_conf = GUI.Toggle(new Rect(190, 400, 250, 40), move_mode_conf, " invertieren");
 		
 		Standard["rotate_speed"] = rgx.Replace(Standard["rotate_speed"].ToString(), "");
@@ -796,6 +936,15 @@ public class menu : MonoBehaviour {
 	 * 
 	 * 
 	 */
+	public string[] GameObjectListToStringList(List<GameObject> Gameobjects) {
+		string[] names = new string[Gameobjects.Count];
+		i = 0;
+		foreach(GameObject Gameobject in Gameobjects) {
+			names[i] = Gameobject.name.ToString();
+			i++;
+		}
+		return names;
+	}
 	public void setInspectElementVar(Boolean value) {
 		this.inspectElementVar = value;
 	}
@@ -805,7 +954,6 @@ public class menu : MonoBehaviour {
 			Element.transform.position.y.ToString(),
 			Element.transform.position.z.ToString()
 		};
-		inspectELementWindowRect = new Rect(250,200,430,310);
 		this.inspectElementVar = true;
 	}
 	
