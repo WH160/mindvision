@@ -123,7 +123,9 @@ public class viewer : MonoBehaviour {
 	GameObject selectedObject = null;
 	public GameObject locked_element;
 	public GameObject rotationfocus;
+
 	public int look_mode;
+	//string var1 = (bla == true) ? "wert 1" : "wert 2"; if -> wert 1 | else -> wert 2
 
 	menu menu;
 	presentationscript presentationscript;
@@ -138,8 +140,8 @@ public class viewer : MonoBehaviour {
 		locked_dist = 0f;
 		element_locked=false;
 		locked_element=null;
-		GameObject elm = null;
-		GameObject rotationfocus = null;
+		elm = null;
+		rotationfocus = null;
 		rotation_mode=2;
 		store = 1;
 		move_mode = 1;
@@ -168,16 +170,21 @@ public class viewer : MonoBehaviour {
 		Debug.DrawRay (xaxe.origin,xaxe.direction*10,Color.gray);
 		vec3=ray.GetPoint(20);
 		mouse_pos=new Vector3(vec3.x,vec3.y,vec3.z);
-		action_control();
-
-		if(mouselocked())
+		if(Input.anyKey==true || Input.GetAxis("Mouse 3")!=0)
+			action_control();
+		else
+		{
+			if(mouselocked())
 		{
 			Screen.lockCursor=false;
 			element_locked=false;
 		}
-		if(focus_locked==true)
+			if(focus_locked==true)
 			unlock_fokus();
+		}
+
 	}
+
 	bool mouselocked(){
 		if(Screen.lockCursor==true)
 			return true;
@@ -208,33 +215,27 @@ public class viewer : MonoBehaviour {
 	{
 
 	}
+	void auto_move()
+	{
+
+	}
 	void construction_mode()
 	{
-		if(Input.GetMouseButton (1))
-		{
-			move_camera();
-		}
-		if(Input.GetAxis("Mouse 3")!=0)
-		{
-			zoom_camera();
-		}
-		if(Input.GetMouseButton (2))
-		{
-			rotate_camera(rotation_mode);
-		}
 		if(menu.getOverMenu() != true) {
 			if(Input.GetMouseButtonDown (0)==true && menu.getAction_mode()==1)
 				create_coreelement ();
 			if(Input.GetMouseButtonDown(0)==true && menu.getAction_mode()==2)
 				relation_storage ();
 			if(Input.GetMouseButtonDown(0)==true && menu.getAction_mode ()==0)
-			{
 				select_object();
-			}
 			if(Input.GetMouseButtonDown(0)==true && menu.getAction_mode ()==3)
-			{
 				deselect_object();
-			}
+			if(Input.GetMouseButton (1))
+				move_camera();
+			if(Input.GetAxis("Mouse 3")!=0)
+				zoom_camera();
+			if(Input.GetMouseButton (2))
+				rotate_camera(rotation_mode);
 		}
 	}
 
