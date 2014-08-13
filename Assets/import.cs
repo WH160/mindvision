@@ -70,7 +70,6 @@ public class import : MonoBehaviour {
 		} else {
 			menu.console("INFO: checking Project "+PathProject+" -> fails");
 			return false;
-			
 		}
 	}
 
