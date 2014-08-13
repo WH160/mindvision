@@ -108,10 +108,12 @@ public class viewer : MonoBehaviour {
 
 	bool element_locked;
 	bool focus_locked;
+
 	int i;							//default index
 	int inspect_mode;
 	int tool;						//type of tool
 	int store;						//defines storeplace of gameobjects (for relations)
+
 	public int rotation_mode;		//mode of motion
 	Color c1 = Color.yellow;		//relation color-begin
 	Color c2 = Color.red;			//relation color-end
@@ -122,24 +124,29 @@ public class viewer : MonoBehaviour {
 	public GameObject locked_element;
 	public GameObject rotationfocus;
 
+	public int look_mode;
+	//string var1 = (bla == true) ? "wert 1" : "wert 2"; if -> wert 1 | else -> wert 2
+
 	menu menu;
+	presentationscript presentationscript;
 
 	ListWithDuplicates coreelements_relations = new ListWithDuplicates();
 	ListWithDuplicates coreelements_relations_tmp;
 	List<LineRenderer> selectedRelations;
 
 	public void Start(){
+		look_mode=1;							//construction_mode 1 presentation_mode 2 
 		speed=100;
 		locked_dist = 0f;
 		element_locked=false;
 		locked_element=null;
-		GameObject elm = null;
-		GameObject rotationfocus = null;
-
+		elm = null;
+		rotationfocus = null;
 		rotation_mode=2;
 		store = 1;
 		move_mode = 1;
 		menu = GameObject.Find("menu").GetComponent<menu>();
+		presentationscript = GameObject.Find("viewer").GetComponent<presentationscript>();
 
 		coreelements=new List<GameObject>();
 		relations=new List<LineRenderer>();
@@ -163,22 +170,21 @@ public class viewer : MonoBehaviour {
 		Debug.DrawRay (xaxe.origin,xaxe.direction*10,Color.gray);
 		vec3=ray.GetPoint(20);
 		mouse_pos=new Vector3(vec3.x,vec3.y,vec3.z);
-
 		if(Input.anyKey==true || Input.GetAxis("Mouse 3")!=0)
-		{
 			action_control();
-		}
 		else
 		{
 			if(mouselocked())
-			{
-				Screen.lockCursor=false;
-				element_locked=false;
-			}
-			if(focus_locked==true)
-				unlock_fokus();
+		{
+			Screen.lockCursor=false;
+			element_locked=false;
 		}
+			if(focus_locked==true)
+			unlock_fokus();
+		}
+
 	}
+
 	bool mouselocked(){
 		if(Screen.lockCursor==true)
 			return true;
@@ -188,44 +194,48 @@ public class viewer : MonoBehaviour {
 	void action_control()
 	{
 		objectdirection();
-		construction_mode();
+		switch(look_mode)
+		{
+		case 1:
+			construction_mode();
+			break;
+		case 2:
+			presentationscript.presentation_mode();
+			break;
+		default:
+			construction_mode();
+			break;
+		}
 	}
-	void presentation_mode()
+	public void set_look_mode(int mode)
 	{
-
+		look_mode=mode;
 	}
 	void fly_mode()
 	{
 
 	}
+	void auto_move()
+	{
+
+	}
 	void construction_mode()
 	{
-		if(Input.GetMouseButton (1))
-		{
-			move_camera();
-		}
-
-		if(Input.GetAxis("Mouse 3")!=0)
-		{
-			zoom_camera();
-		}
-		if(Input.GetMouseButton (2))
-		{
-			rotate_camera(rotation_mode);
-		}
 		if(menu.getOverMenu() != true) {
 			if(Input.GetMouseButtonDown (0)==true && menu.getAction_mode()==1)
 				create_coreelement ();
 			if(Input.GetMouseButtonDown(0)==true && menu.getAction_mode()==2)
 				relation_storage ();
 			if(Input.GetMouseButtonDown(0)==true && menu.getAction_mode ()==0)
-			{
 				select_object();
-			}
 			if(Input.GetMouseButtonDown(0)==true && menu.getAction_mode ()==3)
-			{
 				deselect_object();
-			}
+			if(Input.GetMouseButton (1))
+				move_camera();
+			if(Input.GetAxis("Mouse 3")!=0)
+				zoom_camera();
+			if(Input.GetMouseButton (2))
+				rotate_camera(rotation_mode);
 		}
 	}
 
@@ -242,8 +252,6 @@ public class viewer : MonoBehaviour {
 
 			if(rotationfocus_locked())
 			{
-				float x = Camera.main.transform.eulerAngles.x;
-				float y = Camera.main.transform.eulerAngles.y;
 				float z = Camera.main.transform.eulerAngles.z;
 				z=360-z;
 				element.transform.LookAt (Camera.main.transform.position);
@@ -262,7 +270,27 @@ public class viewer : MonoBehaviour {
 			line.SetPosition(1,bunchOfObjects[1].transform.position);
 		}
 	}
-
+	public void create_coreelement(float x, float y, float z, string name, int type)
+	{
+		Vector3 pos = new Vector3(x,y,z);
+		switch(type){
+		case 1: 
+			GameObject ce_plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+			ce_plane.transform.position= pos;
+			ce_plane.transform.name=name;
+			coreelements.Add (ce_plane);
+			break;
+		case 2: 
+			GameObject ce_sphere = (GameObject)Instantiate(coreelementToCopy);
+			ce_sphere.GetComponentInChildren<TextMesh>().text = ce_sphere.name.ToString();
+			ce_sphere.transform.position= pos;
+			ce_sphere.transform.name=name;
+			coreelements.Add (ce_sphere);
+			break;
+		default:
+			break;
+		}
+	}
 	void create_coreelement(){
 
 		switch(menu.getElementnr()){
@@ -285,7 +313,6 @@ public class viewer : MonoBehaviour {
 	void move_camera()
 	{
 		speed=float.Parse(menu.getConfig("move_speed").ToString());
-
 		if(menu.getConfig("move_mode").ToString()=="True") {
 			move_mode = -1;
 		} else {
@@ -301,17 +328,13 @@ public class viewer : MonoBehaviour {
 		speed=int.Parse(menu.getConfig("zoom_speed").ToString());;
 		if(Input.GetAxis ("Mouse 3")>0)
 		Camera.main.transform.Translate(Vector3.forward*Time.deltaTime*speed);
-
 		if(Input.GetAxis ("Mouse 3")<0)
 		Camera.main.transform.Translate(Vector3.back*Time.deltaTime*speed);
 	}
 	/**
 	 * visible_by_cam (true) -> returns closest rendered object from List coreelements 
 	 * 				  (false)-> returns closest object from List coreelements
-	 * 
-	 * 
-	 * 
-	 * **/
+	 */
 	public GameObject getClosest_element(bool visible_by_cam)
 	{
 		float distance = 0f;
@@ -383,9 +406,7 @@ public class viewer : MonoBehaviour {
 
 	void rotate_camera(int rotation_mode)
 	{
-
-		int mode=rotation_mode;
-		switch(mode){
+		switch(rotation_mode){
 			case 1:
 				speed= int.Parse(menu.getConfig("rotate_speed").ToString());
 				float motionx = speed*Input.GetAxis ("Mouse X")*Time.deltaTime;
@@ -419,12 +440,8 @@ public class viewer : MonoBehaviour {
 		{
 			speed=float.Parse(menu.getConfig("move_speed").ToString());
 			camera.transform.parent = rotationfocus.transform;
-
-
 			float y =speed*Input.GetAxis("Mouse X")*Time.deltaTime;
 			float x =speed*Input.GetAxis ("Mouse Y")*Time.deltaTime;
-
-
 			rotationfocus.transform.Rotate(x,y,0);
 		}
 	}
@@ -565,8 +582,6 @@ public class viewer : MonoBehaviour {
 			lRend.SetPosition (1,end);
 			lRend.SetColors(c1,c2);
 			lRend.SetWidth(1,1);
-			// macht Probleme, wenn man es buildet und ausführt!!! (2h Fehlersuche -.-' )
-			//lRend.material = new Material(Shader.Find("Particles/Additive"));
 			relations.Add (lRend);
 			coreelements_relations.Add(obj1,lRend);
 			coreelements_relations.Add(obj2,lRend);

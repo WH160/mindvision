@@ -5,3 +5,8 @@ Temp
 *.unityproj
 *.sln
 *.userprefs
+*.dll
+build/mindvision_Data/mainData
+build/mindvision_Data/output_log.txt
+build/mindvision_Data/PlayerConnectionConfigFile
+build/mindvision_Data/sharedassets0.assets
