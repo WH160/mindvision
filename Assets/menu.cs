@@ -256,8 +256,6 @@ public class menu : MonoBehaviour {
 		menu_pos_stand_invisible.Add("y_inspectElementWindowRect",0);
 		menu_pos_stand_invisible.Add("yStep_inspectElementWindowRect",0);
 
-		buttonStyle.Add("toolbox->Element","button");
-
 		foreach(KeyValuePair<string,float> pair in menu_pos_stand_invisible) {
 			menu_pos.Add(pair.Key,pair.Value);
 			menu_pos_stand_manipulated.Add(pair.Key,menu_pos_stand_visible[pair.Key]);
