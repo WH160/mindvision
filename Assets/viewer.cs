@@ -97,6 +97,11 @@ public class viewer : MonoBehaviour {
 	float motionx;					//motion value for x-axe (cameramotion)
 	float motiony;					//motion value for y-axe (cameramotion)
 	float speed; 					//cameraspeed
+
+	float fly_speed;				//cameraspeed in fly_mode
+	float strave;
+	float tilt;
+
 	public GameObject lineToCopy;
 	public GameObject coreelementToCopy;
 	GameObject elm;
@@ -135,6 +140,7 @@ public class viewer : MonoBehaviour {
 	List<LineRenderer> selectedRelations;
 
 	public void Start(){
+		fly_speed = 0;
 		look_mode=1;							//construction_mode 1 presentation_mode 2 
 		speed=100;
 		locked_dist = 0f;
@@ -202,6 +208,8 @@ public class viewer : MonoBehaviour {
 		case 2:
 			presentationscript.presentation_mode();
 			break;
+		case 3:
+			fly_mode();
 		default:
 			construction_mode();
 			break;
@@ -213,7 +221,46 @@ public class viewer : MonoBehaviour {
 	}
 	void fly_mode()
 	{
+		lock_focus ();
+		if(Input.GetKeyDown("w"))
+			fly_speed = fly_speed+1;
+		if(Input.GetKeyDown("s"))
+			fly_speed = fly_speed-1;
+		if(Input.GetKeyDown("a"))
+			strave = strave-1;
+		if(Input.GetKeyDown("d"))
+			strave=strave+1;
+		if(Input.GetKeyDown("q"))
+			tilt=tilt-1;
+		if(Input.GetKeyDown("e"))
+			tilt=tilt+1;
+		if(Input.GetKeyDown("space"))
+			reduce_propulsion();
+		if(Input.GetKeyDown("ESC"))
+		    stop_propulsion();
 
+		
+	}
+	void stop_propulsion()
+	{
+		fly_speed = 0;
+		strave = 0;
+		tilt = 0;
+	}
+	void reduce_propulsion()
+	{
+		if (fly_speed > 0)
+						fly_speed -= Time.deltaTime;
+				else
+						fly_speed += Time.deltaTime;
+		if (strave > 0)
+						strave -= Time.deltaTime;
+				else
+						strave += Time.deltaTime;
+		if (tilt > 0)
+						tilt -= Time.deltaTime;
+				else
+						tilt += Time.deltaTime;
 	}
 	void auto_move()
 	{
@@ -254,11 +301,11 @@ public class viewer : MonoBehaviour {
 			{
 				float z = Camera.main.transform.eulerAngles.z;
 				z=360-z;
-				element.transform.LookAt (Camera.main.transform.position);
-				element.transform.rotation = Quaternion.Euler (element.transform.eulerAngles.x,element.transform.eulerAngles.y,z);
+				element.transform.LookAt (Camera.main.transform.position,Camera.main.transform.up);
+				//element.transform.rotation = Quaternion.Euler (element.transform.eulerAngles.x,element.transform.eulerAngles.y,z);
 			}
 			else
-				element.transform.LookAt (Camera.main.transform.position);
+				element.transform.LookAt (Camera.main.transform.position,Camera.main.transform.up);
 		}
 	}
 
@@ -469,8 +516,9 @@ public class viewer : MonoBehaviour {
 	{
 		rotationfocus=new GameObject();
 		rotationfocus.transform.position=position;
+		rotationfocus.transform.eulerAngles = Camera.main.transform.eulerAngles;
 		rotationfocus.name="rotationfocus";
-		Camera.main.transform.LookAt(rotationfocus.transform.position);
+		Camera.main.transform.LookAt(rotationfocus.transform.position,rotationfocus.transform.up);
 		lock_focus();
 		return rotationfocus;
 	}
