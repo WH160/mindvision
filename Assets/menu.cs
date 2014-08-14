@@ -763,6 +763,7 @@ public class menu : MonoBehaviour {
 			console ("click -> open existing project (from: " + initWindowId + ")");
 			initWindowRectSelect = 2;
 			invisibleAllProjectWindows();
+
 		}
 		// Button -> options
 		if (GUI.Button (new Rect (0, 140, 220, 50), "Optionen")) {
@@ -783,6 +784,7 @@ public class menu : MonoBehaviour {
 	void projectWindowQuit(int windowID) {
 		GUI.Label(new Rect(20,50,370,100),"Sind Sie sicher, dass Sie das Programm beenden wollen?");
 		if (GUI.Button (new Rect (10, 150, 180, 50), "Ja")) {
+			GameObject.Find("io").GetComponent<export>().save();
 			Application.Quit();
 		}
 		if (GUI.Button (new Rect (210, 150, 180, 50), "Nein")) {
@@ -1072,6 +1074,7 @@ public class menu : MonoBehaviour {
 			project["Name"] = projectName;
 			project["Author"] = getProjectConfig(projectLocation,projectName,"Author");
 			console("INFO: "+project["Author"]);
+			GameObject.Find("io").GetComponent<import>().setElements();
 			return true;
 		} else {
 			console("ERROR: Bad project");

@@ -33,9 +33,36 @@ public class import : MonoBehaviour {
 			menu.console("Es wurde kein Project ausgewählt.");
 		}
 	}
+	void deleteElement() {
+		List<GameObject> tmpCoreelements = viewer.getCoreelements ();
+		if (tmpCoreelements.Count>0) {
+			viewer.destroyElement (tmpCoreelements [tmpCoreelements.Count -1]);
+			deleteElement();
+		}
+	}
+	public void setElements() {
+		deleteElement ();
 
-	void setElements() {
-
+		Hashtable project = menu.getProject ();
+		// safe location
+		string TopLevelPath = @project["Location"].ToString();
+		// projectpath wich should be created
+		string ProjectPath = TopLevelPath;
+		
+		// relation file path
+		// and creation
+		string elementsfile = System.IO.Path.Combine(ProjectPath, project["Name"].ToString() + "_elements" + ".csv");
+		// Open the file to read from.
+		using (StreamReader sr = File.OpenText(elementsfile)) {
+			string s = "";
+			string[] words;
+			while ((s = sr.ReadLine()) != null) {
+				words = s.Split(new char[] {';'});
+				if(words[0]!=null) {
+					viewer.create_coreelement(float.Parse(words[2].ToString()), float.Parse(words[3].ToString()), float.Parse(words[4].ToString()), words[1].ToString(), int.Parse(words[5].ToString()), int.Parse(words[0].ToString()));
+				}
+			}
+		}
 	}
 
 	/** Checks project if its consistent

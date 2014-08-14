@@ -141,6 +141,8 @@ public class viewer : MonoBehaviour {
 
 	public void Start(){
 		fly_speed = 0;
+		strave = 0;
+		tilt = 0;
 		look_mode=1;							//construction_mode 1 presentation_mode 2 
 		speed=100;
 		locked_dist = 0f;
@@ -210,6 +212,7 @@ public class viewer : MonoBehaviour {
 			break;
 		case 3:
 			fly_mode();
+			break;
 		default:
 			construction_mode();
 			break;
@@ -238,8 +241,6 @@ public class viewer : MonoBehaviour {
 			reduce_propulsion();
 		if(Input.GetKeyDown("ESC"))
 		    stop_propulsion();
-
-		
 	}
 	void stop_propulsion()
 	{
@@ -317,7 +318,7 @@ public class viewer : MonoBehaviour {
 			line.SetPosition(1,bunchOfObjects[1].transform.position);
 		}
 	}
-	public void create_coreelement(float x, float y, float z, string name, int type)
+	public void create_coreelement(float x, float y, float z, string name, int type, int id)
 	{
 		Vector3 pos = new Vector3(x,y,z);
 		switch(type){
@@ -325,13 +326,17 @@ public class viewer : MonoBehaviour {
 			GameObject ce_plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			ce_plane.transform.position= pos;
 			ce_plane.transform.name=name;
+			ce_plane.GetComponentInChildren<vars>().Id = id;
+			ce_plane.GetComponentInChildren<vars>().Type = 1;
 			coreelements.Add (ce_plane);
 			break;
 		case 2: 
 			GameObject ce_sphere = (GameObject)Instantiate(coreelementToCopy);
-			ce_sphere.GetComponentInChildren<TextMesh>().text = ce_sphere.name.ToString();
+			ce_sphere.GetComponentInChildren<TextMesh>().text = name;
 			ce_sphere.transform.position= pos;
 			ce_sphere.transform.name=name;
+			ce_sphere.GetComponentInChildren<vars>().Id = id;
+			ce_sphere.GetComponentInChildren<vars>().Type = 2;
 			coreelements.Add (ce_sphere);
 			break;
 		default:
@@ -339,17 +344,20 @@ public class viewer : MonoBehaviour {
 		}
 	}
 	void create_coreelement(){
-
 		switch(menu.getElementnr()){
 		case 1: 
 			GameObject ce_plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			ce_plane.transform.position= mouse_pos;
+			ce_plane.GetComponentInChildren<vars>().Id = coreelements.Count;
+			ce_plane.GetComponentInChildren<vars>().Type = 1;
 			coreelements.Add (ce_plane);
 			break;
 		case 2: 
 			GameObject ce_sphere = (GameObject)Instantiate(coreelementToCopy);
 			ce_sphere.GetComponentInChildren<TextMesh>().text = ce_sphere.name.ToString();
 			ce_sphere.transform.position= mouse_pos;
+			ce_sphere.GetComponentInChildren<vars>().Id = coreelements.Count;
+			ce_sphere.GetComponentInChildren<vars>().Type = 2;
 			coreelements.Add (ce_sphere);
 			break;
 		default:
@@ -642,6 +650,9 @@ public class viewer : MonoBehaviour {
 			return false;
 		}
 	}
+	public void create_relation(GameObject obj1, GameObject obj2) {
+		create_relation (new Vector3 (), new Vector3 (), obj1, obj2);
+	}
 	Boolean select_object()
 	{
 		RaycastHit hit;
@@ -749,6 +760,12 @@ public class viewer : MonoBehaviour {
 
 		return position;
 	}
+
+	public List<LineRenderer> getRelations ()
+	{
+		return relations;
+	}
+
 	public List<GameObject> GetConnectedElements(GameObject Element) {
 		return this.coreelements_relations.GetConnectedElements(Element);
 	}
