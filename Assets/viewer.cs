@@ -91,6 +91,8 @@ public class viewer : MonoBehaviour {
 	Vector3 minZ;
 	Vector3 maxZ;
 	Vector3 position;
+	Vector3 translation_fly;		//cameratranslation (fly_mode)
+	Vector3 tilt_fly;				//cameratilt (fly_mode)
 
 	float locked_dist;				//magnitude of vector3 camera.main to locked element
 	float tmp;
@@ -101,6 +103,9 @@ public class viewer : MonoBehaviour {
 	float fly_speed;				//cameraspeed in fly_mode
 	float strave;
 	float tilt;
+	float rise;
+	float traveltime;				//time for slerp
+	bool propulsion;
 
 	public GameObject lineToCopy;
 	public GameObject coreelementToCopy;
@@ -140,10 +145,12 @@ public class viewer : MonoBehaviour {
 	List<LineRenderer> selectedRelations;
 
 	public void Start(){
+
+		rise = 0;
 		fly_speed = 0;
 		strave = 0;
 		tilt = 0;
-		look_mode=1;							//construction_mode 1 presentation_mode 2 
+		look_mode=3;							//construction_mode 1 presentation_mode 2 fly_mode 3
 		speed=100;
 		locked_dist = 0f;
 		element_locked=false;
@@ -178,21 +185,23 @@ public class viewer : MonoBehaviour {
 		Debug.DrawRay (xaxe.origin,xaxe.direction*10,Color.gray);
 		vec3=ray.GetPoint(20);
 		mouse_pos=new Vector3(vec3.x,vec3.y,vec3.z);
-		if(Input.anyKey==true || Input.GetAxis("Mouse 3")!=0)
+		if(Input.anyKey==true || Input.GetAxis("Mouse 3")!=0 || look_mode==3)
 			action_control();
-		else
-		{
-			if(mouselocked())
-		{
-			Screen.lockCursor=false;
-			element_locked=false;
+		if(Input.GetMouseButtonUp(2))
+		{	
+			unlock_mouse();
+			if(rotationfocus_locked())
+				unlock_fokus();
 		}
-			if(focus_locked==true)
-			unlock_fokus();
-		}
-
 	}
-
+	void lock_mouse()
+	{
+		Screen.lockCursor = true;
+	}
+	void unlock_mouse ()
+	{
+		Screen.lockCursor = false;
+	}
 	bool mouselocked(){
 		if(Screen.lockCursor==true)
 			return true;
@@ -220,48 +229,92 @@ public class viewer : MonoBehaviour {
 	}
 	public void set_look_mode(int mode)
 	{
+		unlock_mouse();
 		look_mode=mode;
 	}
 	void fly_mode()
 	{
-		lock_focus ();
-		if(Input.GetKeyDown("w"))
+		if(Input.GetKey("1"))
+		   lock_mouse();
+		if(Input.GetKey ("2"))
+			unlock_mouse();
+		if(Input.GetKey("w"))
 			fly_speed = fly_speed+1;
-		if(Input.GetKeyDown("s"))
+		if(Input.GetKey("s"))
 			fly_speed = fly_speed-1;
-		if(Input.GetKeyDown("a"))
+		if(Input.GetKey("a"))
 			strave = strave-1;
-		if(Input.GetKeyDown("d"))
+		if(Input.GetKey("d"))
 			strave=strave+1;
-		if(Input.GetKeyDown("q"))
+		if(Input.GetKey("q"))
 			tilt=tilt-1;
-		if(Input.GetKeyDown("e"))
+		if(Input.GetKey("e"))
 			tilt=tilt+1;
+		if(Input.GetKey ("x"))
+			rise=rise+1;
+		if(Input.GetKey ("c"))
+			rise=rise-1;
 		if(Input.GetKeyDown("space"))
 			reduce_propulsion();
-		if(Input.GetKeyDown("ESC"))
-		    stop_propulsion();
+		if(Input.GetKeyDown(KeyCode.Escape))
+		{
+			stop_propulsion();
+			set_look_mode (1);
+		}
+
+		Vector3 tilt_fly = new Vector3 (0,0,tilt);
+		Vector3 translation_fly = new Vector3(strave,rise,fly_speed);
+		Camera.main.transform.Translate(translation_fly*Time.deltaTime);
+		Camera.main.transform.Rotate(tilt_fly*Time.deltaTime);
+		rotation_mode=1;
+		rotate_camera(rotation_mode);
+
+		if(fly_speed!=0 || strave!=0 || tilt != 0 || rise !=0)
+			propulsion=true;
+		else
+			propulsion=false;
 	}
 	void stop_propulsion()
 	{
 		fly_speed = 0;
 		strave = 0;
 		tilt = 0;
+		rise=0;
+		propulsion=false;
 	}
 	void reduce_propulsion()
 	{
-		if (fly_speed > 0)
-						fly_speed -= Time.deltaTime;
-				else
-						fly_speed += Time.deltaTime;
-		if (strave > 0)
-						strave -= Time.deltaTime;
-				else
-						strave += Time.deltaTime;
-		if (tilt > 0)
-						tilt -= Time.deltaTime;
-				else
-						tilt += Time.deltaTime;
+		while(propulsion)
+		{
+			if (fly_speed > 0)
+				fly_speed -= Time.deltaTime;
+			else
+				fly_speed += Time.deltaTime;
+			if (strave > 0)
+				strave -= Time.deltaTime;
+			else
+				strave += Time.deltaTime;
+			if (tilt > 0)
+				tilt -= Time.deltaTime;
+			else
+				tilt += Time.deltaTime;
+			if (rise > 0)
+				rise -= Time.deltaTime;
+			else
+				rise += Time.deltaTime;
+
+			if(fly_speed >-0.1 && fly_speed <0.1)
+				fly_speed=0;
+			if(strave >-0.1 && strave <0.1)
+				strave =0;
+			if(tilt >-0.1 && tilt <0.1)
+				tilt=0;
+			if(rise >-0.1 && rise <0.1)
+				rise =0;
+
+			if(fly_speed==0&&strave==0&&tilt==0&&rise==0)
+				propulsion=false;
+		}
 	}
 	void auto_move()
 	{
@@ -297,16 +350,7 @@ public class viewer : MonoBehaviour {
 			Debug.DrawRay(yaxe.origin,yaxe.direction*20,Color.red);
 			Ray xaxe = new Ray(element.transform.position, element.transform.right);
 			Debug.DrawRay(xaxe.origin,xaxe.direction*20,Color.red);
-
-			if(rotationfocus_locked())
-			{
-				float z = Camera.main.transform.eulerAngles.z;
-				z=360-z;
-				element.transform.LookAt (Camera.main.transform.position,Camera.main.transform.up);
-				//element.transform.rotation = Quaternion.Euler (element.transform.eulerAngles.x,element.transform.eulerAngles.y,z);
-			}
-			else
-				element.transform.LookAt (Camera.main.transform.position,Camera.main.transform.up);
+			element.transform.LookAt (Camera.main.transform.position,Camera.main.transform.up);
 		}
 	}
 

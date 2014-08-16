@@ -42,7 +42,7 @@ public class export : MonoBehaviour {
 			}
 		}
 
-		// relation file path
+/*		// relation file path
 		// and creation
 		string relationsfile = System.IO.Path.Combine(ProjectPath, project["Name"].ToString() + "_relations" + ".csv");
 		if (!File.Exists (relationsfile)) {
@@ -55,6 +55,6 @@ public class export : MonoBehaviour {
 
 				sw.WriteLine (obj.GetComponentInChildren<vars>().Id+";"+obj.GetComponentInChildren<TextMesh>().text+";"+obj.transform.position.x+";"+obj.transform.position.y+";"+obj.transform.position.z+";"+obj.GetComponentInChildren<vars>().Type);
 			}
-		}
+		}*/
 	}
 }
