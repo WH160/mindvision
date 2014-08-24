@@ -8,7 +8,6 @@ using System.Collections.Generic;
 
 public class viewer : MonoBehaviour {
 
-
 	public class ListWithDuplicates : List<KeyValuePair<GameObject, LineRenderer>>
 	{
 		public void Add(GameObject key, LineRenderer value)
@@ -93,7 +92,9 @@ public class viewer : MonoBehaviour {
 	Vector3 position;
 	Vector3 translation_fly;		//cameratranslation (fly_mode)
 	Vector3 tilt_fly;				//cameratilt (fly_mode)
-
+	Vector3 newPosition;
+	Vector3 lerp_target;
+	Vector3 home;					//set position for center_cam on button o
 	float locked_dist;				//magnitude of vector3 camera.main to locked element
 	float tmp;
 	float motionx;					//motion value for x-axe (cameramotion)
@@ -104,8 +105,8 @@ public class viewer : MonoBehaviour {
 	float strave;
 	float tilt;
 	float rise;
-	float traveltime;				//time for slerp
-	bool propulsion;
+
+	float camera_distance;
 
 	public GameObject lineToCopy;
 	public GameObject coreelementToCopy;
@@ -117,12 +118,20 @@ public class viewer : MonoBehaviour {
 	List<LineRenderer> tmp_list;
 
 	bool element_locked;
-	bool focus_locked;
+	bool focus_locked;				
+	bool input_disabled;			//keyboard and mouse input is disabled
+	bool propulsion;				//there is movement while in fly_mode
+
+	bool is_lerping;
 
 	int i;							//default index
 	int inspect_mode;
 	int tool;						//type of tool
 	int store;						//defines storeplace of gameobjects (for relations)
+	int mode_count;
+	int current_autopos;
+	int next_autopos;
+	int autopos_mode;
 
 	public int rotation_mode;		//mode of motion
 	Color c1 = Color.yellow;		//relation color-begin
@@ -131,6 +140,7 @@ public class viewer : MonoBehaviour {
 	string element_details;
 	GameObject torch = null;
 	GameObject selectedObject = null;
+	GameObject obj_to_lerp = null;
 	public GameObject locked_element;
 	public GameObject rotationfocus;
 
@@ -143,21 +153,34 @@ public class viewer : MonoBehaviour {
 	ListWithDuplicates coreelements_relations = new ListWithDuplicates();
 	ListWithDuplicates coreelements_relations_tmp;
 	List<LineRenderer> selectedRelations;
+	List <GameObject> waypoints = new List<GameObject>();
+	public float smooth = 5.0f;
+	Vector3 newTarget;
 
 	public void Start(){
+		autopos_mode=1;
+		next_autopos=0;
+		lerp_target= new Vector3(10,10,10);
+		newTarget = new Vector3(100,100,100);
+		is_lerping = false;
+		home = new Vector3(0,0,0);
+		current_autopos = 1;						//current auto_move position
 
+		mode_count=4;							//number of modes
+		camera_distance = 10;					//default distance in automove
+		input_disabled=false;
 		rise = 0;
 		fly_speed = 0;
 		strave = 0;
 		tilt = 0;
-		look_mode=3;							//construction_mode 1 presentation_mode 2 fly_mode 3
+		look_mode=1;							//construction_mode 1 presentation_mode 2 fly_mode 3
 		speed=100;
 		locked_dist = 0f;
 		element_locked=false;
 		locked_element=null;
 		elm = null;
 		rotationfocus = null;
-		rotation_mode=2;
+		rotation_mode=2;						//1 selfcenteres ; 2 by closest element
 		store = 1;
 		move_mode = 1;
 		menu = GameObject.Find("menu").GetComponent<menu>();
@@ -166,6 +189,7 @@ public class viewer : MonoBehaviour {
 		coreelements=new List<GameObject>();
 		relations=new List<LineRenderer>();
 		tmp_list = new List<LineRenderer>();
+
 
 		//Hastable project = menu.getProject();
 		//menu.showMessage("Projekt geladen");
@@ -176,7 +200,6 @@ public class viewer : MonoBehaviour {
 
 		Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
 		Debug.DrawRay (ray.origin,ray.direction*10,Color.cyan);
-
 		Ray zaxe = new Ray(Camera.main.transform.position,Camera.main.transform.forward);
 		Debug.DrawRay (zaxe.origin,zaxe.direction*10,Color.gray);
 		Ray yaxe = new Ray(Camera.main.transform.position,Camera.main.transform.up);
@@ -185,14 +208,74 @@ public class viewer : MonoBehaviour {
 		Debug.DrawRay (xaxe.origin,xaxe.direction*10,Color.gray);
 		vec3=ray.GetPoint(20);
 		mouse_pos=new Vector3(vec3.x,vec3.y,vec3.z);
-		if(Input.anyKey==true || Input.GetAxis("Mouse 3")!=0 || look_mode==3)
-			action_control();
-		if(Input.GetMouseButtonUp(2))
-		{	
-			unlock_mouse();
-			if(rotationfocus_locked())
-				unlock_fokus();
+		key_control();
+	}
+	void set_cam_lerp_distance(float distance)
+	{
+		camera_distance=distance;
+	}
+	void obj_lerp(GameObject obj, Vector3 target)
+	{
+		if(!got_parent (obj))
+		{
+			GameObject slerpobj=attach_gameobject_to(obj,"movehelp",obj.transform.position+(camera_distance*Camera.main.transform.forward),true,obj.transform.rotation);
+			slerpobj.AddComponent("smooth_movement");
+			smooth_movement sr = slerpobj.GetComponent<smooth_movement>();
+			sr.StartLerping(target);
 		}
+		else
+		{
+			GameObject lerpobj=obj.transform.parent.gameObject;
+			smooth_movement sm = obj.transform.parent.GetComponent <smooth_movement>();
+			sm.StartLerping(target);
+		}
+	}
+	GameObject attach_lerp(GameObject obj)
+	{
+		GameObject lerpobj=attach_gameobject_to(obj,"movehelp",obj.transform.position+(camera_distance*Camera.main.transform.forward),true,obj.transform.rotation);
+		return lerpobj;
+	}
+
+	void obj_slerp(GameObject obj, Vector3 target)
+	{
+		if(!got_parent (obj))
+		{
+			GameObject slerpobj=attach_gameobject_to(obj,"movehelp",obj.transform.position+(camera_distance*Camera.main.transform.forward),true,obj.transform.rotation);
+			slerpobj.AddComponent("smooth_movement");
+			smooth_movement sr = slerpobj.GetComponent<smooth_movement>();
+			sr.StartSlerp(target);
+		}
+		else
+		{
+			GameObject slerpobj=obj.transform.parent.gameObject;
+			smooth_movement sm = obj.transform.parent.GetComponent <smooth_movement>();
+			sm.StartSlerp(target);
+		}
+	}
+	public GameObject attach_gameobject_to(GameObject obj,string name, Vector3 position, bool directed, Quaternion direction)
+	{
+		GameObject go =new GameObject();
+		go.name=name;
+		go.transform.position=position;
+		if(directed)
+			go.transform.rotation=direction;
+		obj.transform.parent=go.transform;
+		return go;
+	}
+	void disable_input()
+	{
+		input_disabled = true;
+	}
+	void enable_input()
+	{
+		input_disabled = false;
+	}
+	bool input_is_disabled()
+	{
+		if(input_disabled == false)
+			return false;
+		else
+			return true;
 	}
 	void lock_mouse()
 	{
@@ -208,6 +291,66 @@ public class viewer : MonoBehaviour {
 		else
 			return false;
 	}
+	bool got_children(GameObject potential_parent)
+	{
+		if(potential_parent.transform.root.childCount > 0)
+			return true;
+		else
+			return false;
+	}
+	bool got_parent(GameObject potential_child)
+	{
+		if(potential_child.transform.root!=potential_child.transform)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	public void set_look_mode(int mode)
+	{
+		unlock_mouse();
+		look_mode=mode;
+	}
+	void key_control()
+	{
+		if(Input.anyKey || Input.GetAxis("Mouse 3")!=0 || look_mode==3 || look_mode==4)
+		{
+			action_control();
+		}
+		if(Input.GetMouseButtonUp(2))
+		{	
+			unlock_mouse();
+			if(rotationfocus_locked())
+				unlock_fokus();
+		}
+		if(input_disabled && look_mode==3)
+			enable_input();
+		if(input_disabled==false)
+		{
+			if(Input.GetKeyDown (KeyCode.Tab))
+			{
+				stop_propulsion();
+				switch_look_mode();
+			}
+		}
+		if(Input.GetKeyDown(KeyCode.Escape))
+		{
+			stop_propulsion();
+			set_look_mode (1);
+		}
+		if(Input.GetKeyDown(KeyCode.H))
+		{
+			stop_propulsion();
+			center_cam(home,0f);
+		}
+
+		if(Input.GetKeyDown(KeyCode.O))
+			set_home();
+	}
 	void action_control()
 	{
 		objectdirection();
@@ -222,15 +365,28 @@ public class viewer : MonoBehaviour {
 		case 3:
 			fly_mode();
 			break;
+		case 4:
+			auto_move(autopos_mode);
+			break;
 		default:
 			construction_mode();
 			break;
 		}
 	}
-	public void set_look_mode(int mode)
+	void set_home()
 	{
-		unlock_mouse();
-		look_mode=mode;
+		home=new Vector3(Camera.main.transform.position.x,Camera.main.transform.position.y,Camera.main.transform.position.z);
+	}
+	void set_home(Vector3 position)
+	{
+		home = position;
+	}
+	void switch_look_mode()
+	{
+		if(look_mode==mode_count)
+			set_look_mode(1);
+		else
+			look_mode+=1;
 	}
 	void fly_mode()
 	{
@@ -256,12 +412,7 @@ public class viewer : MonoBehaviour {
 			rise=rise-1;
 		if(Input.GetKeyDown("space"))
 			reduce_propulsion();
-		if(Input.GetKeyDown(KeyCode.Escape))
-		{
-			stop_propulsion();
-			set_look_mode (1);
-		}
-
+		
 		Vector3 tilt_fly = new Vector3 (0,0,tilt);
 		Vector3 translation_fly = new Vector3(strave,rise,fly_speed);
 		Camera.main.transform.Translate(translation_fly*Time.deltaTime);
@@ -287,7 +438,7 @@ public class viewer : MonoBehaviour {
 		while(propulsion)
 		{
 			if (fly_speed > 0)
-				fly_speed -= Time.deltaTime;
+				fly_speed -= Time.deltaTime*0.01f;
 			else
 				fly_speed += Time.deltaTime;
 			if (strave > 0)
@@ -316,9 +467,57 @@ public class viewer : MonoBehaviour {
 				propulsion=false;
 		}
 	}
-	void auto_move()
+	void center_cam(GameObject focus, float distance)
 	{
-
+		Camera.main.transform.position = focus.transform.position+Vector3.one*distance;
+		Camera.main.transform.LookAt(focus.transform.position);
+	}
+	void center_cam(Vector3 focus, float distance)
+	{
+		Camera.main.transform.position = focus+Vector3.one*distance;
+		Camera.main.transform.LookAt(focus);
+	}
+	public void set_autopos_mode(int mode)
+	{
+		autopos_mode = mode;
+	}
+	void auto_move(int mode)
+	{
+		switch (mode)
+		{
+		case 1:
+			if(coreelements.Count>1)
+			{
+				if(!got_parent(Camera.main.gameObject))
+				{
+					obj_lerp(Camera.main.gameObject,coreelements[next_autopos].transform.position);
+					obj_slerp(Camera.main.gameObject,coreelements[next_autopos].transform.position);
+					if(next_autopos<coreelements.Count-1)
+					{
+						next_autopos+=1;
+					}
+					else
+					{
+						next_autopos=0;
+					}
+				}
+			}
+			break;
+		case 2:
+			if(waypoints.Count>1)
+			{
+				obj_lerp(Camera.main.gameObject,waypoints[next_autopos].transform.position);
+				obj_slerp(Camera.main.gameObject,waypoints[next_autopos].transform.position);
+				if(next_autopos<waypoints.Count)
+					next_autopos+=1;
+				else
+					next_autopos=1;
+			}
+			break;
+		default:
+			auto_move (1);
+			break;
+		}
 	}
 	void construction_mode()
 	{

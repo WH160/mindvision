@@ -109,6 +109,7 @@ MonoBehaviour:
   locked_element: {fileID: 0}
   rotationfocus: {fileID: 0}
   look_mode: 0
+  smooth: 5
 --- !u!4 &1819980684
 Transform:
   m_ObjectHideFlags: 0
